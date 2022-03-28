@@ -1,22 +1,24 @@
 import unittest
 
 # classes
-from classes.excel import Excel, Sheet
+from excel import Excel, Sheet
 
 
 class TestStringMethods(unittest.TestCase):
-    def test_update_get_cell(self):
-        print("\n", "update_cell and get_cell")
+    # TODO Complete test
+    def test_save_excel(self):
+        print("\n", "save_excel")
         excel_obj = Excel(excel_filename="test\excel_test.xlsx")
-        sheet1 = Sheet(excel_obj, "Name")
-        sheet2 = Sheet(excel_obj, "Name", "Sheet 2")
-        self.assertEqual(sheet1.get_cell("Brian", "Birth Month"), "June")
+        sheet3 = Sheet(excel_obj, "Name")
+        self.assertEqual(sheet3.get_cell("Brian", "Birth Month"), "June")
         self.assertEqual(
-            sheet1.update_cell("Brian", "Birth Month", "May"),
+            sheet3.update_cell("Brian", "Birth Month", "May"),
             True,
         )
-        self.assertEqual(sheet1.get_cell("Brian", "Birth Month"), "May")
-        self.assertEqual(sheet2.get_cell("Brian", "Birth Month"), "June")
+        self.assertEqual(sheet3.get_cell("Brian", "Birth Month"), "May")
+
+    def test_ask_to_open(self):
+        print("\n", "ask_to_open")
 
 
 if __name__ == "__main__":
