@@ -46,7 +46,7 @@ class Excel:
 
     def log(self, msg, type="info"):
         """
-        ph
+        Logs `msg` with set `type` if `use_logging` is True.
         """
         if self.use_logging:
             if type == "info":
@@ -55,6 +55,20 @@ class Excel:
                 self.logger.warning(msg)
             if type == "error":
                 self.logger.error(msg)
+
+    def create_dataframe(self, date_columns=None, na_values=None):
+        """
+        Creates a panda dataframe using the current used sheet.
+        """
+        file_loc = self.file_path
+        df = pd.read_excel(
+            file_loc,
+            engine="openpyxl",
+            sheet_name=None,
+            parse_dates=date_columns,
+            na_values=na_values,
+        )
+        return df
 
     def save_excel(self, use_print=True, backup=True):
         """
@@ -163,11 +177,15 @@ class Sheet:
             raise "Left and Right can't both be greater then 0."
         return f'INDIRECT("RC[{num}]",0)'
 
-    def easy_indrect_cell(self, cur_col, near_col):
+    def easy_indirect_cell(self, cur_col, ref_col):
         """
-        Allows setting up an indirect cell formula
+        Allows setting up an indirect cell formula.
+
+        Set `cur_col`to the column name of the column the formula is going into.
+
+        Set `near_col` to the column name of the column you are wanting to reference.
         """
-        diff = self.col_idx[cur_col] - self.col_idx[near_col]
+        diff = self.col_idx[ref_col] - self.col_idx[cur_col]
         return self.indirect_cell(manual_set=diff)
 
     def get_column_index(self):
@@ -345,14 +363,3 @@ class Sheet:
         self.cur_sheet.delete_column(column)
         self.excel.changes_made = True
         return True
-
-    def create_dataframe(self, date_columns=None, na_values=None):
-        file_loc = self.excel.file_path
-        df = pd.read_excel(
-            file_path=file_loc,
-            engine="openpyxl",
-            sheet_name=self.sheet_name,
-            parse_dates=date_columns,
-            na_values=na_values,
-        )
-        return df
