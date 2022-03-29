@@ -1,4 +1,5 @@
 import datetime as dt
+import pandas as pd
 import unittest
 
 # classes
@@ -71,6 +72,17 @@ class TestStringMethods(unittest.TestCase):
         self.assertEqual(sheet1.indirect_cell(left=7), 'INDIRECT("RC[-7]",0)')
         self.assertEqual(sheet1.indirect_cell(right=5), 'INDIRECT("RC[5]",0)')
 
+    def test_easy_indirect_cell(self):
+        print("\n", "easy_indirect_cell")
+        excel_obj = Excel(excel_filename="test\excel_test.xlsx")
+        sheet1 = Sheet(excel_obj, "Name")
+        self.assertEqual(
+            sheet1.easy_indirect_cell("Age", "Name"), 'INDIRECT("RC[-2]",0)'
+        )
+        self.assertEqual(
+            sheet1.easy_indirect_cell("Name", "Age"), 'INDIRECT("RC[2]",0)'
+        )
+
     def test_update_get_cell(self):
         print("\n", "update_cell and get_cell")
         excel_obj = Excel(excel_filename="test\excel_test.xlsx")
@@ -103,12 +115,11 @@ class TestStringMethods(unittest.TestCase):
         sheet1 = Sheet(excel_obj, "Name")
 
     def test_create_dataframe(self):
-        # TODO Complete test
         print("\n", "create_dataframe")
         excel_obj = Excel(excel_filename="test\excel_test.xlsx")
-        sheet1 = Sheet(excel_obj, "Name")
-        df = sheet1.create_dataframe()
-        print(df)
+        df = excel_obj.create_dataframe()
+        self.assertIsInstance(df, dict)
+        self.assertIsInstance(df["Sheet 1"], pd.DataFrame)
 
 
 if __name__ == "__main__":
