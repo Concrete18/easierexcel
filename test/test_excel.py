@@ -8,7 +8,7 @@ class TestStringMethods(unittest.TestCase):
     # TODO Complete test
     def test_save_excel(self):
         print("\n", "save_excel")
-        excel_obj = Excel(excel_filename="test\excel_test.xlsx")
+        excel_obj = Excel(excel_filepath="test\excel_test.xlsx")
         sheet3 = Sheet(excel_obj, "Name")
         self.assertEqual(sheet3.get_cell("Brian", "Birth Month"), "June")
         self.assertEqual(

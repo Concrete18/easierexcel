@@ -15,7 +15,7 @@ class Excel:
 
     def __init__(
         self,
-        excel_filename,
+        excel_filepath,
         use_logging=True,
         log_file="excel.log",
         log_level=lg.DEBUG,
@@ -23,14 +23,14 @@ class Excel:
         """
         Allows retreiving, adding, updating, deleting and formatting cells within Excel.
 
-        `excel_filename` is the path to the excel file.
+        `excel_filepath` is the path to the excel file.
 
         `log_file` sets the path for logging.
 
         `log_level` Sets the logging level of this logger. level must be an int or a str.
         """
         # workbook setup
-        self.file_path = Path(excel_filename)
+        self.file_path = Path(excel_filepath)
         self.wb = openpyxl.load_workbook(self.file_path)
         # logger setup
         self.use_logging = use_logging
@@ -90,10 +90,13 @@ class Excel:
                 first_run = True
                 while True:
                     try:
-                        self.wb.save(self.file_path)
-                        if use_print:
-                            print(f'Save Complete.{34*" "}')
-                            self.changes_made = False
+                        if self.file_path.exists:
+                            self.wb.save(self.file_path)
+                            if use_print:
+                                print(f'Save Complete.{34*" "}')
+                                self.changes_made = False
+                        else:
+                            print("File no longer exists. Save Cancelled")
                         break
                     except PermissionError:
                         if first_run:
@@ -107,26 +110,34 @@ class Excel:
                     print("\nCancelling Save")
                 exit()
 
-    def ask_to_open(self, skip_input=False):
+    def open_excel(self, save=True):
         """
-        Opens excel file if after enter is pressed if the file still exists.
+        Opens the current excel file if it still exists and then exits.
+
+        Saves changes if `save` is True.
+        """
+        if save:
+            self.save_excel()
+        if self.file_path.exists:
+            os.startfile(self.file_path)
+        else:
+            print("File no longer exists.")
+        exit()
+
+    def open_file_input(self):
+        """
+        Opens the excel file if it exists after enter is pressed during the input.
         """
         if not self.ext_terminal:
             self.save_excel()
             exit()
-        if not skip_input:
-            try:
-                input("\nPress Enter to open the excel sheet.\n")
-            except KeyboardInterrupt:
-                print("Closing")
-                self.save_excel()
-                exit()
-        if self.file_path.exists:
+        try:
+            input("\nPress Enter to open the excel sheet.\n")
+        except KeyboardInterrupt:
+            print("Closing...")
             self.save_excel()
-            os.startfile(self.file_path)
-        else:
-            input("Excel File was not found.")
-        exit()
+            exit()
+        self.open_excel()
 
 
 class Sheet:
