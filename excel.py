@@ -6,6 +6,7 @@ import datetime as dt
 import pandas as pd
 import shutil, os, sys
 import openpyxl
+import zipfile
 
 
 class Excel:
@@ -15,7 +16,7 @@ class Excel:
 
     def __init__(
         self,
-        excel_filepath,
+        excel_filename,
         use_logging=True,
         log_file="excel.log",
         log_level=lg.DEBUG,
@@ -23,15 +24,21 @@ class Excel:
         """
         Allows retreiving, adding, updating, deleting and formatting cells within Excel.
 
-        `excel_filepath` is the path to the excel file.
+        `excel_filename` is the path to the excel file.
 
         `log_file` sets the path for logging.
 
         `log_level` Sets the logging level of this logger. level must be an int or a str.
         """
         # workbook setup
-        self.file_path = Path(excel_filepath)
-        self.wb = openpyxl.load_workbook(self.file_path)
+        self.file_path = Path(excel_filename)
+        try:
+            self.wb = openpyxl.load_workbook(self.file_path)
+        except zipfile.BadZipFile:
+            response = input(
+                f"Error with {self.file_path}.\nCheck backup to restore data.lf.file_path"
+            )
+            # TODO Add restore to backup option
         # logger setup
         self.use_logging = use_logging
         log_formatter = lg.Formatter(
@@ -253,7 +260,7 @@ class Sheet:
         elif time:
             return f"=TIME({hour},{minute},0)"
         else:
-            self.log(f"create_excel_date did nothing", "warning")
+            self.excel.log(f"create_excel_date did nothing", "warning")
             return None
 
     def get_row_col_index(self, row_value, column_value):
@@ -285,7 +292,7 @@ class Sheet:
             return self.cur_sheet.cell(row=row_key, column=column_key).value
         else:
             msg = f"get_cell: {column_value} and {row_value} point to nothing"
-            self.log(msg, "warning")
+            self.excel.log(msg, "warning")
             return None
 
     def update_index(self, col_key):
@@ -317,7 +324,7 @@ class Sheet:
                 return True
         else:
             msg = f"update_cell: {col_val} and {row_val} point to nothing"
-            self.log(msg, "warning")
+            self.excel.log(msg, "warning")
             return False
 
     def add_new_line(self, cell_dict, column_key, save=False):
@@ -335,7 +342,7 @@ class Sheet:
             if column not in self.col_idx and column not in self.missing_columns:
                 self.missing_columns.append(column)
                 msg = f"add_new_line: Missing {column} in {self.sheet_name} sheet"
-                self.log(msg, "warning")
+                self.excel.log(msg, "warning")
         append_list = []
         for column in self.col_idx:
             if column in cell_dict:
