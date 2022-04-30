@@ -124,6 +124,11 @@ class Excel:
                 if use_print:
                     print("\nCancelling Save")
                 exit()
+        else:
+            if use_print:
+                msg = "Save Skipped due to no changes being made."
+                self.logger.info(msg)
+                print(msg)
 
     def open_excel(self, save=True):
         """
@@ -248,28 +253,15 @@ class Sheet:
         else:
             return any(x in string for x in list)
 
-    def create_excel_date(self, datetime=None, date=True, time=True):
+    def create_excel_date(self, datetime=None):
         """
-        creates an excel date from the givin `datetime` object using =DATE().
+        Creates an date string in an excel friendly format.
 
-        Defaults to the current date and time if no datetime object is given.
+        Defaults to the current date.
         """
         if datetime == None:
             datetime = dt.datetime.now()
-        year = datetime.year
-        month = datetime.month
-        day = datetime.day
-        hour = datetime.hour
-        minute = datetime.minute
-        if date and time:
-            return f"=DATE({year}, {month}, {day})+TIME({hour},{minute},0)"
-        elif date:
-            return f"=DATE({year}, {month}, {day})+TIME(0,0,0)"
-        elif time:
-            return f"=TIME({hour},{minute},0)"
-        else:
-            self.excel.log(f"create_excel_date did nothing", "warning")
-            return None
+        return datetime.strftime("%m/%d/%Y")
 
     def get_row_col_index(self, row_value, column_value):
         """
