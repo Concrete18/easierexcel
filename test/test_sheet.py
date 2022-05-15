@@ -61,9 +61,7 @@ class TestStringMethods(unittest.TestCase):
         excel_obj = Excel(excel_filename="test\excel_test.xlsx")
         sheet1 = Sheet(excel_obj, "Name")
         test_date = dt.datetime(2022, 12, 4, 1, 4, 2)
-        self.assertEqual(
-            sheet1.create_excel_date(test_date), "=DATE(2022, 12, 4)+TIME(1,4,0)"
-        )
+        self.assertEqual(sheet1.create_excel_date(test_date), "12/04/2022")
 
     def test_indirect_cell(self):
         print("\n", "indirect_cell")
