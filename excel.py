@@ -299,7 +299,7 @@ class Sheet:
         """
         self.row_idx[col_key] = self.cur_sheet._current_row
 
-    def update_cell(self, row_val, col_val, new_val, blank=False, save=False):
+    def update_cell(self, row_val, col_val, new_val, replace=False, save=False):
         """
         Updates the cell based on `row_val` and `col_val` to `new_val`.
 
@@ -307,16 +307,17 @@ class Sheet:
 
         Saves after change if `save` is True.
         """
-        row_key, column_key = self.get_row_col_index(row_val, col_val)
-        if row_key is not None and column_key is not None:
-            current_value = self.cur_sheet.cell(row=row_key, column=column_key).value
-            if blank and current_value is not None:
+        row_key, col_key = self.get_row_col_index(row_val, col_val)
+        if row_key is not None and col_key is not None:
+            cur_val = self.cur_sheet.cell(row=row_key, column=col_key).value
+            # returns False if replace is False and the current value is not blank
+            if not replace and cur_val is not None:
                 return False
             # updates only if cell will actually be changed
             if new_val == "":
                 new_val = None
-            if current_value != new_val:
-                self.cur_sheet.cell(row=row_key, column=column_key).value = new_val
+            if cur_val != new_val:
+                self.cur_sheet.cell(row=row_key, column=col_key).value = new_val
                 if save:
                     self.excel.save_excel(use_print=False, backup=False)
                 else:
