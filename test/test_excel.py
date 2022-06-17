@@ -20,6 +20,13 @@ class TestStringMethods(unittest.TestCase):
     def test_ask_to_open(self):
         print("\n", "ask_to_open")
 
+    def test_create_dataframe(self):
+        print("\n", "create_dataframe")
+        excel_obj = Excel(excel_filename="test\excel_test.xlsx")
+        df = excel_obj.create_dataframe()
+        self.assertIsInstance(df, dict)
+        self.assertIsInstance(df["Sheet 1"], pd.DataFrame)
+
 
 if __name__ == "__main__":
     unittest.main()

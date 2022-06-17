@@ -112,12 +112,22 @@ class TestStringMethods(unittest.TestCase):
         excel_obj = Excel(excel_filename="test\excel_test.xlsx")
         sheet1 = Sheet(excel_obj, "Name")
 
-    def test_create_dataframe(self):
-        print("\n", "create_dataframe")
+    def test_format_picker(self):
+        print("\n", "format_picker")
         excel_obj = Excel(excel_filename="test\excel_test.xlsx")
-        df = excel_obj.create_dataframe()
-        self.assertIsInstance(df, dict)
-        self.assertIsInstance(df["Sheet 1"], pd.DataFrame)
+        # TODO use improved options
+        sheet1 = Sheet(excel_obj, "Name")
+        column_list = {
+            "Days Since": ["center_align", "count_days"],
+            "Name": ["left_align"],
+            "Birth Date": ["center_align", "date"],
+            "Price": ["center_align", "currency"],
+            "Number": ["center_align", "integer"],
+            "Hours": ["center_align", "decimal"],
+            "%": ["center_align", "percent"],
+        }
+        for entry in column_list.keys():
+            self.assertEqual(sheet1.format_picker(entry), column_list[entry])
 
 
 if __name__ == "__main__":
