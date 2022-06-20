@@ -1,4 +1,5 @@
 import unittest
+import pandas as pd
 
 # classes
 from excel import Excel, Sheet

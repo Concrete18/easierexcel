@@ -1,6 +1,7 @@
 import datetime as dt
-import pandas as pd
 import unittest
+
+from requests import options
 
 # classes
 from excel import Excel, Sheet
@@ -115,19 +116,143 @@ class TestStringMethods(unittest.TestCase):
     def test_format_picker(self):
         print("\n", "format_picker")
         excel_obj = Excel(excel_filename="test\excel_test.xlsx")
-        # TODO use improved options
-        sheet1 = Sheet(excel_obj, "Name")
+        options = {
+            "shrink_to_fit_cell": True,
+            "light_grey_fill": ["Rating Comparison", "Probable Completion"],
+            "percent": [
+                "%",
+                "Percent",
+                "Discount",
+                "Rating Comparison",
+                "Probable Completion",
+            ],
+            "currency": ["Price", "MSRP", "Cost"],
+            "integer": ["App ID", "Number", "Release Year"],
+            "count_days": ["Days Till Release", "Days Since Update"],
+            "date": ["Last Updated", "Date"],
+            "decimal": ["Hours Played", "Linux Hours", "Time To Beat in Hours"],
+            "left_align": [
+                "Game Name",
+                "Developers",
+                "Publishers",
+                "Genre",
+            ],
+            "center_align": [
+                "My Rating",
+                "Metacritic",
+                "Rating Comparison",
+                "Play Status",
+                "Platform",
+                "VR Support",
+                "Early Access",
+                "Platform",
+                "Steam Deck Status",
+                "Hours Played",
+                "Linux Hours",
+                "Time To Beat in Hours",
+                "Probable Completion",
+                "Store Link",
+                "Release Year",
+                "App ID",
+                "Days Since Update",
+                "Date Updated",
+                "Date Added",
+            ],
+        }
+        sheet1 = Sheet(excel_obj, "Name", options=options)
         column_list = {
-            "Days Since": ["center_align", "count_days"],
-            "Name": ["left_align"],
-            "Birth Date": ["center_align", "date"],
-            "Price": ["center_align", "currency"],
-            "Number": ["center_align", "integer"],
-            "Hours": ["center_align", "decimal"],
-            "%": ["center_align", "percent"],
+            "My Rating": ["default_border", "center_align"],
+            "Metacritic": ["default_border", "center_align"],
+            "Rating Comparison": [
+                "default_border",
+                "center_align",
+                "percent",
+                "light_grey_fill",
+            ],
+            "Game Name": ["default_border", "left_align"],
+            "Play Status": ["default_border", "center_align"],
+            "Platform": ["default_border", "center_align"],
+            "Developers": ["default_border", "left_align"],
+            "Publishers": ["default_border", "left_align"],
+            "Genre": ["default_border", "left_align"],
+            "VR Support": ["default_border", "center_align"],
+            "Early Access": ["default_border", "center_align"],
+            "Steam Deck Status": ["default_border", "center_align"],
+            "Hours Played": ["default_border", "center_align", "decimal"],
+            "Linux Hours": ["default_border", "center_align", "decimal"],
+            "Time To Beat in Hours": ["default_border", "center_align", "decimal"],
+            "Probable Completion": [
+                "default_border",
+                "center_align",
+                "percent",
+                "light_grey_fill",
+            ],
+            "Store Link": ["default_border", "center_align"],
+            "Release Year": ["default_border", "center_align", "integer"],
+            "App ID": ["default_border", "center_align", "integer"],
+            "Days Since Update": ["default_border", "center_align", "count_days"],
+            "Date Updated": ["default_border", "center_align", "date"],
+            "Date Added": ["default_border", "center_align", "date"],
         }
         for entry in column_list.keys():
-            self.assertEqual(sheet1.format_picker(entry), column_list[entry])
+            actions = sorted(sheet1.format_picker(entry))
+            answers = sorted(column_list[entry])
+            self.assertEqual(actions, answers)
+
+    def test_get_column_formats(self):
+        print("\n", "get_column_formats")
+        excel_obj = Excel(excel_filename="test\excel_test.xlsx")
+        options = {
+            "shrink_to_fit_cell": True,
+            "light_grey_fill": ["Rating Comparison", "Probable Completion"],
+            "percent": [
+                "%",
+                "Percent",
+                "Discount",
+                "Rating Comparison",
+                "Probable Completion",
+            ],
+            "currency": ["Price", "MSRP", "Cost"],
+            "integer": ["App ID", "Number", "Release Year"],
+            "count_days": ["Days Till Release", "Days Since Update"],
+            "date": ["Last Updated", "Date"],
+            "decimal": ["Hours Played", "Linux Hours", "Time To Beat in Hours"],
+            "left_align": [
+                "Game Name",
+                "Developers",
+                "Publishers",
+                "Genre",
+            ],
+            "center_align": [
+                "My Rating",
+                "Metacritic",
+                "Rating Comparison",
+                "Play Status",
+                "Platform",
+                "VR Support",
+                "Early Access",
+                "Platform",
+                "Steam Deck Status",
+                "Hours Played",
+                "Linux Hours",
+                "Time To Beat in Hours",
+                "Probable Completion",
+                "Store Link",
+                "Release Year",
+                "App ID",
+                "Days Since Update",
+                "Date Updated",
+                "Date Added",
+            ],
+        }
+        sheet1 = Sheet(excel_obj, "Name", options=options)
+        formats = sheet1.get_column_formats()
+        answer = {
+            "Age": ["default_border", "center_align"],
+            "Birth Month": ["default_border", "center_align"],
+            "Name": ["default_border", "center_align"],
+        }
+        self.assertEqual(formats, answer)
 
 
 if __name__ == "__main__":
