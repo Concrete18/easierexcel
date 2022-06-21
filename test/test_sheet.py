@@ -1,7 +1,4 @@
-import datetime as dt
 import unittest
-
-from requests import options
 
 # classes
 from excel import Excel, Sheet
