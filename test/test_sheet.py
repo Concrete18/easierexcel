@@ -57,13 +57,6 @@ class TestStringMethods(unittest.TestCase):
             {"Michael": 2, "John": 3, "Brian": 4, "Allison": 5, "Daniel": 6, "Rob": 7},
         )
 
-    def test_create_excel_date(self):
-        print("\n", "create_excel_date")
-        excel_obj = Excel(excel_filename="test\excel_test.xlsx")
-        sheet1 = Sheet(excel_obj, "Name")
-        test_date = dt.datetime(2022, 12, 4, 1, 4, 2)
-        self.assertEqual(sheet1.create_excel_date(test_date), "12/04/2022")
-
     def test_indirect_cell(self):
         print("\n", "indirect_cell")
         excel_obj = Excel(excel_filename="test\excel_test.xlsx")
