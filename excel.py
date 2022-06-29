@@ -388,15 +388,15 @@ class Sheet:
         Saves after change if `save` is True.
         """
         # missing column checker
-        for column in cell_dict.keys():
-            if column not in self.col_idx and column not in self.missing_columns:
-                self.missing_columns.append(column)
-                msg = f"add_new_line: Missing {column} in {self.sheet_name} sheet"
+        for col in cell_dict.keys():
+            if col not in self.col_idx and col not in self.missing_columns:
+                self.missing_columns.append(col)
+                msg = f"add_new_line: Missing {col} in {self.sheet_name} sheet"
                 self.excel.log(msg, "warning")
         append_list = []
-        for column in self.col_idx:
-            if column in cell_dict:
-                append_list.append(cell_dict[column])
+        for col in self.col_idx:
+            if col in cell_dict:
+                append_list.append(cell_dict[col])
             else:
                 append_list.append("")
         self.cur_sheet.append(append_list)
