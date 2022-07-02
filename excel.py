@@ -6,6 +6,22 @@ from pathlib import Path
 import pandas as pd
 
 
+def benchmark(func):
+    """
+    Prints `func` name and a benchmark for runtime.
+    """
+
+    def wrapped(*args, **kwargs):
+        start = time.perf_counter()
+        value = func(*args, **kwargs)
+        end = time.perf_counter()
+        elapsed = round(end - start, 2)
+        print(f"{func.__name__} Completion Time: {elapsed}")
+        return value
+
+    return wrapped
+
+
 class Excel:
 
     changes_made = False
@@ -24,6 +40,8 @@ class Excel:
         formatting cells within Excel.
 
         `excel_filename` is the path to the excel file.
+
+        `use_logging` allows disabling all logs when running.
 
         `log_file` sets the path for logging.
 
@@ -72,9 +90,18 @@ class Excel:
             if type == "error":
                 self.logger.error(msg)
 
-    def create_dataframe(self, date_columns=None, na_values=None):
+    def create_dataframe(
+        self,
+        date_columns: list = None,
+        na_values: list = None,
+    ):
         """
         Creates a panda dataframe using the current used sheet.
+
+        `date_columns` sets the columns with dates.
+
+        `na_values` sets what should be considered N/A values that are ignored.
+
         """
         file_loc = self.file_path
         df = pd.read_excel(
@@ -93,12 +120,15 @@ class Excel:
         backup: bool = True,
     ):
         """
+        `use_print` determines if info for the saving progress will be printed.
+
+        `force_save` can be used to make sure a save occurs.
+
         Backs up the excel file before saving the changes if `backup` is True.
 
         It will keep trying to save until it completes in case of permission
         errors caused by the file being open.
 
-        `use_print` determines if info for the saving progress will be printed.
         """
         # only saves if any changes were made
         if self.changes_made or force_save:
@@ -186,15 +216,17 @@ class Sheet:
 
         `excel_object` Excel object created using Excel class.
 
-        `sheet_name` Name of the sheet to use.
-
         `column_name` Name of the main column you intend to use for
         identifying rows.
+
+        `sheet_name` Name of the sheet to use.
+
+        `options` used to determine auto formatting.
         """
         self.wb = excel_object.wb
         self.excel = excel_object
-        self.column_name = column_name
         self.sheet_name = sheet_name
+        self.column_name = column_name
         # defaults used sheet to first one if none is specified
         if sheet_name:
             self.cur_sheet = self.wb[sheet_name]
@@ -236,6 +268,8 @@ class Sheet:
         Returns a string for setting an indirect cell location to
         a number `left` or `right`.
 
+        `manual_set` can be used to set the indirect cell offset manually.
+
         Only one direction can be greater then 0.
         """
         num = 0
@@ -256,7 +290,7 @@ class Sheet:
         Set `cur_col`to the column name of the column theformula is going
         into.
 
-        Set `near_col` to the column name of the column you are wanting
+        Set `ref_col` to the column name of the column you are wanting
         to reference.
         """
         diff = self.col_idx[ref_col] - self.col_idx[cur_col]
@@ -275,7 +309,7 @@ class Sheet:
 
     def get_row_index(self, col_name: str):
         """
-        Creates the row index based on `column_name`.
+        Creates the row index based on `col_name`.
         """
         row_idx = {}
         total_rows = len(self.cur_sheet["A"])
@@ -329,11 +363,11 @@ class Sheet:
         else:
             return None
 
-    def update_index(self, col_key: str):
+    def update_index(self, column_key: str):
         """
-        Updates the current row with the `column_key` in the `row_idx` variable.
+        Updates the current row with the `column_key` in the row_idx variable.
         """
-        self.row_idx[col_key] = self.cur_sheet._current_row
+        self.row_idx[column_key] = self.cur_sheet._current_row
 
     def update_cell(
         self,
@@ -347,6 +381,9 @@ class Sheet:
         Updates the cell based on `row_val` and `col_val` to `new_val`.
 
         Returns True if cell was updated and False if it was not updated.
+
+        `replace` allows you to determine if a cell will have its
+        existing value changed if it is not None.
 
         Saves after change if `save` is True.
         """
@@ -380,6 +417,9 @@ class Sheet:
         Adds the given dictionary, as `cell_dict`, onto a new line
         within the excel sheet.
 
+        column_key is required to update the current index so the new line
+        can be modified without reloading the sheet.
+
         If dictionary keys match existing columns within the set sheet,
         it will add the value to that column.
 
@@ -410,15 +450,16 @@ class Sheet:
     def delete_by_row(self, col_val: str, save: bool = False):
         """
         Deletes row by `column_value`.
+
+        `save` allows you to force a save after deleting a row.
         """
         if col_val not in self.row_idx:
             return None
         row = self.row_idx[col_val]
         self.cur_sheet.delete_rows(row)
+        self.excel.changes_made = True
         if save:
             self.excel.save_excel(use_print=False, backup=False)
-        else:
-            self.excel.changes_made = True
         return True
 
     def delete_by_column(self, column_name: str):
@@ -613,6 +654,8 @@ class Sheet:
             self.set_fill(cell, color="fffff")
         elif "light_grey_fill" in formatting:
             self.set_fill(cell, color="F2F2F2")
+        # makes sure changes will be saved next time the file is saved.
+        self.changes_made = True
 
     def format_row(self, row_identifier: str):
         """
@@ -638,5 +681,4 @@ class Sheet:
             # runs through all cells in a column and runs the actions
             col_i = self.col_idx[column]
             for row_i in self.row_idx.values():
-                cell = self.cur_sheet.cell(row=row_i, column=col_i)
-                self.set_border(cell, "thin")
+                self.format_cell(column, row_i, col_i)
