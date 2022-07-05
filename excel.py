@@ -128,7 +128,6 @@ class Excel:
 
         It will keep trying to save until it completes in case of permission
         errors caused by the file being open.
-
         """
         # only saves if any changes were made
         if self.changes_made or force_save:
@@ -352,14 +351,35 @@ class Sheet:
             column_key = column_value
         return row_key, column_key
 
+    def extract_hyperlink(self, cell_value):
+        """
+        Extracts the hyperlink target from a cell with the hyperlink formula.
+
+        This is only needed if excel has not applied the hyperlink yet.
+        This often happens when you click on the cell with the hyperlink formula.
+        """
+        if not cell_value:
+            raise "Cell Value is None"
+        if "=HYPERLINK(" in cell_value:
+            split = cell_value.split('"')
+            return split[1]
+        else:
+            return cell_value
+
     def get_cell(self, row_value: str or int, column_value: str or int):
         """
         Gets the cell value based on the `row_value` and `column_value`.
+
+        If the cell is a hyperlink that is currently clickable,
+        the hyperlink target will be returned.
         """
-        row_key, column_key = self.get_row_col_index(row_value, column_value)
+        row_k, col_k = self.get_row_col_index(row_value, column_value)
         # gets the value
-        if row_key is not None and column_key is not None:
-            return self.cur_sheet.cell(row=row_key, column=column_key).value
+        if row_k is not None and col_k is not None:
+            cell = self.cur_sheet.cell(row=row_k, column=col_k)
+            if cell.hyperlink:
+                return cell.hyperlink.target
+            return self.cur_sheet.cell(row=row_k, column=col_k).value
         else:
             return None
 
@@ -513,13 +533,6 @@ class Sheet:
         else:
             cell.style = "General"
 
-    def set_date_format(self, cell: object, format: str = "MM/DD/YYYY"):
-        """
-        Sets a cell to a date format.
-        """
-        if format == "MM/DD/YYYY":
-            cell.number_format = "MM/DD/YYYY"
-
     def format_picker(self, column: str):
         """
         Determines what formatting to apply to a column.
@@ -637,8 +650,8 @@ class Sheet:
         elif "count_days" in formatting:
             cell.number_format = '# "Days"'
         # dates
-        elif "default_border" in formatting:
-            self.set_date_format(cell, "")
+        elif cell.is_date:
+            cell.number_format = "mm-dd-yy"
         # border
         if "default_border" in formatting:
             self.set_border(cell)
