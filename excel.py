@@ -465,7 +465,7 @@ class Sheet:
             self.excel.changes_made = True
         return True
 
-    def delete_by_row(self, col_val: str, save: bool = False):
+    def delete_row(self, col_val: str, save: bool = False):
         """
         Deletes row by `column_value`.
 
@@ -480,7 +480,7 @@ class Sheet:
             self.excel.save(use_print=False, backup=False)
         return True
 
-    def delete_by_column(self, column_name: str):
+    def delete_column(self, column_name: str):
         """
         Deletes column by `column_name`.
         """
