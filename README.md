@@ -1,12 +1,33 @@
 # easierexcel
 
-This modules allows for an easy way to get and update cell values.
+This modules allows for an easy way to get and update cell values ect...
+
+openpyxl is used to do the bulk while easierexcel makes it much easier to use.
 
 ## Quick Start
+
+Install easierexcel using pip:
+
+```bash
+$ pip install easierexcel
+```
+
+### Example Table
+
+| Name    | Birth Month | Age | Null |
+| ------- | ----------- | --- | ---- |
+| John    | John        | 31  | null |
+| Michael | June        | 31  | null |
+| Brian   | August      | 30  | null |
+| Rob     | July        | 34  | null |
+| Allison | September   | 32  | null |
+
+### Code
 
 ```python
     from easierexcel import Excel, Sheet
 
+    # formatting options
     options = {
         "shrink_to_fit_cell": True,
         "header": {"bold": True, "font_size": 16},
@@ -25,22 +46,54 @@ This modules allows for an easy way to get and update cell values.
         "integer": ["ID", "Number"],
         "date": ["Last Updated", "Date"],
     }
+
+    # class init
     excel = Excel('example_excel.xlsx')
-    games = Sheet(excel, "Name", sheet_name="Example", options=options)
+    example = Sheet(excel, "Name", sheet_name="Example", options=options)
+
+    # deleting
+    example.delete_column("Null")
+    example.delete_row("John")
+
+    # adding a new line
+    data = {
+        "Name":"Billy",
+        "Birth Month":"December",
+        "Age":5,
+    }
+    example.add_new_line(cell_dict=data, column_key="Name")
+
+    # accessing and updating
+    example.get_cell("Michael", "Birth Month") # -> June
+
+    example.get_cell("Michael", "Birth Month", "April")
+
+    example.get_cell("Michael", "Birth Month") # -> April
+
+
+    excel.save() # Saves the excel file
 ```
 
-## Excel
+### Final Table
 
-### Features
+| Name    | Birth Month | Age |
+| ------- | ----------- | --- |
+| Michael | April       | 31  |
+| Brian   | August      | 30  |
+| Rob     | July        | 34  |
+| Allison | September   | 32  |
+| Billy   | December    | 5   |
+
+## Documentation
+
+### Excel
 
 - log
 - save
 - open_excel
 - open_file_input
 
-## Sheet
-
-### Features
+### Sheet
 
 - get_cell
 - update_cell
