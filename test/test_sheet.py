@@ -1,12 +1,12 @@
+import pandas as pd
 import unittest
 
 # classes
 from easierexcel.excel import Excel, Sheet
 
 
-class TestStringMethods(unittest.TestCase):
+class TestSheet(unittest.TestCase):
     def test_get_column_index(self):
-        print("\n", "get_column_index")
         excel_obj = Excel(filename="test\excel_test.xlsx")
         sheet1 = Sheet(excel_obj, "Name")
         self.assertEqual(
@@ -14,7 +14,6 @@ class TestStringMethods(unittest.TestCase):
         )
 
     def test_list_in_string(self):
-        print("\n", "list_in_string")
         excel_obj = Excel(filename="test\excel_test.xlsx")
         sheet1 = Sheet(excel_obj, "Name")
         tests = {
@@ -46,7 +45,6 @@ class TestStringMethods(unittest.TestCase):
         self.assertFalse(sheet1.list_in_string(test_list, "Bateman"))
 
     def test_get_row_index(self):
-        print("\n", "get_row_index")
         excel_obj = Excel(filename="test\excel_test.xlsx")
         sheet1 = Sheet(excel_obj, "Name")
         self.assertEqual(
@@ -55,14 +53,12 @@ class TestStringMethods(unittest.TestCase):
         )
 
     def test_indirect_cell(self):
-        print("\n", "indirect_cell")
         excel_obj = Excel(filename="test\excel_test.xlsx")
         sheet1 = Sheet(excel_obj, "Name")
         self.assertEqual(sheet1.indirect_cell(left=7), 'INDIRECT("RC[-7]",0)')
         self.assertEqual(sheet1.indirect_cell(right=5), 'INDIRECT("RC[5]",0)')
 
     def test_easy_indirect_cell(self):
-        print("\n", "easy_indirect_cell")
         excel_obj = Excel(filename="test\excel_test.xlsx")
         sheet1 = Sheet(excel_obj, "Name")
         self.assertEqual(
@@ -73,7 +69,6 @@ class TestStringMethods(unittest.TestCase):
         )
 
     def test_update_get_cell(self):
-        print("\n", "update_cell and get_cell")
         excel_obj = Excel(filename="test\excel_test.xlsx")
         sheet1 = Sheet(excel_obj, "Name")
         sheet2 = Sheet(excel_obj, "Name", "Sheet 2")
@@ -87,24 +82,20 @@ class TestStringMethods(unittest.TestCase):
 
     def test_add_new_line(self):
         # TODO Complete test
-        print("\n", "add_new_line")
         excel_obj = Excel(filename="test\excel_test.xlsx")
         sheet1 = Sheet(excel_obj, "Name")
 
     def test_delete_by_row(self):
         # TODO Complete test
-        print("\n", "delete_by_row")
-        excel_obj = Excel(filename="test\excel_test.xlsx")``
+        excel_obj = Excel(filename="test\excel_test.xlsx")
         sheet1 = Sheet(excel_obj, "Name")
 
     def test_delete_by_column(self):
         # TODO Complete test
-        print("\n", "delete_by_column")
         excel_obj = Excel(filename="test\excel_test.xlsx")
         sheet1 = Sheet(excel_obj, "Name")
 
     def test_format_picker(self):
-        print("\n", "format_picker")
         excel_obj = Excel(filename="test\excel_test.xlsx")
         options = {
             "shrink_to_fit_cell": True,
@@ -190,7 +181,6 @@ class TestStringMethods(unittest.TestCase):
             self.assertEqual(actions, answers)
 
     def test_get_column_formats(self):
-        print("\n", "get_column_formats")
         excel_obj = Excel(filename="test\excel_test.xlsx")
         options = {
             "shrink_to_fit_cell": True,
@@ -243,6 +233,13 @@ class TestStringMethods(unittest.TestCase):
             "Name": ["default_border", "center_align"],
         }
         self.assertEqual(formats, answer)
+
+    def test_create_dataframe(self):
+        excel_obj = Excel(filename="test\excel_test.xlsx")
+        sheet1 = Sheet(excel_obj, "Name")
+        df = sheet1.create_dataframe()
+        self.assertIsInstance(df, dict)
+        self.assertIsInstance(df["Sheet 1"], pd.DataFrame)
 
 
 if __name__ == "__main__":
