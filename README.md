@@ -5,6 +5,8 @@ This modules allows for an easy way to get and update cell values.
 ## Quick Start
 
 ```python
+    from easierexcel import Excel, Sheet
+
     options = {
         "shrink_to_fit_cell": True,
         "header": {"bold": True, "font_size": 16},
