@@ -96,17 +96,16 @@ class TestUpdateAndGet(unittest.TestCase):
 
 class TestAddNewLine(unittest.TestCase):
     def test_add_new_line(self):
-        # TODO Complete test
         excel_obj = Excel(filename="test\excel_test.xlsx")
         sheet1 = Sheet(excel_obj, "Name")
-
-        sheet1.add_new_line()
-        self.assertEqual(sheet1.get_cell("Brian", "Birth Month"), "June")
+        cell_dict = {"Name": "Donna", "Birth Month": "October", "Age": 12}
+        sheet1.add_new_line(cell_dict)
+        self.assertEqual(sheet1.get_cell("Donna", "Birth Month"), "October")
+        self.assertEqual(sheet1.get_cell("Donna", "Age"), 12)
 
 
 class TestDelete(unittest.TestCase):
     def test_delete_by_row(self):
-        # TODO Complete test
         excel_obj = Excel(filename="test\excel_test.xlsx")
         sheet1 = Sheet(excel_obj, "Name")
         self.assertEqual(sheet1.get_cell("Brian", "Birth Month"), "June")
@@ -114,7 +113,6 @@ class TestDelete(unittest.TestCase):
         self.assertFalse(sheet1.get_cell("Brian", "Birth Month"))
 
     def test_delete_by_column(self):
-        # TODO Complete test
         excel_obj = Excel(filename="test\excel_test.xlsx")
         sheet1 = Sheet(excel_obj, "Name")
         self.assertEqual(sheet1.get_cell("Brian", "Age"), 33)
