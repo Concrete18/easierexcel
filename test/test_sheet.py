@@ -6,7 +6,7 @@ from easierexcel import Excel, Sheet
 
 
 class TestListInString(unittest.TestCase):
-    def test_list_in_string(self):
+    def test_true(self):
         excel_obj = Excel(filename="test\excel_test.xlsx")
         sheet1 = Sheet(excel_obj, "Name")
         tests = {
@@ -28,6 +28,10 @@ class TestListInString(unittest.TestCase):
         }
         for string, list in tests.items():
             self.assertTrue(sheet1.list_in_string(list, string))
+
+    def test_false(self):
+        excel_obj = Excel(filename="test\excel_test.xlsx")
+        sheet1 = Sheet(excel_obj, "Name")
         test_string = ""
         test_list = [
             "testing this out",
@@ -43,7 +47,7 @@ class TestGetIndex(unittest.TestCase):
         excel_obj = Excel(filename="test\excel_test.xlsx")
         sheet1 = Sheet(excel_obj, "Name")
         column_index = sheet1.get_column_index()
-        col_index_ans = {"Name": 1, "Birth Month": 2, "Age": 3}
+        col_index_ans = {"Name": 1, "Birth Month": 2, "Birth Year": 3, "Age": 4}
         self.assertEqual(column_index, col_index_ans)
 
     def test_get_row_index(self):
@@ -62,25 +66,51 @@ class TestGetIndex(unittest.TestCase):
 
 
 class TestIndirectCell(unittest.TestCase):
-    def test_indirect_cell(self):
+    def test_indirect_cell_pos(self):
+        """
+        Positive test for indirect_cell func.
+        """
         excel_obj = Excel(filename="test\excel_test.xlsx")
         sheet1 = Sheet(excel_obj, "Name")
-        self.assertEqual(sheet1.indirect_cell(left=7), 'INDIRECT("RC[-7]",0)')
-        self.assertEqual(sheet1.indirect_cell(right=5), 'INDIRECT("RC[5]",0)')
+        indirect_cell = sheet1.indirect_cell(left=7)
+        self.assertEqual(indirect_cell, 'INDIRECT("RC[-7]",0)')
 
-    def test_easy_indirect_cell(self):
+    def test_indirect_cell_neg(self):
+        """
+        Negative test for indirect_cell func.
+        """
         excel_obj = Excel(filename="test\excel_test.xlsx")
         sheet1 = Sheet(excel_obj, "Name")
-        # negative test
+        indirect_cell = sheet1.indirect_cell(right=5)
+        self.assertEqual(indirect_cell, 'INDIRECT("RC[5]",0)')
+
+    def test_easy_indirect_cell_neg(self):
+        """
+        Negative test for easy_indirect_cell func.
+        """
+        excel_obj = Excel(filename="test\excel_test.xlsx")
+        sheet1 = Sheet(excel_obj, "Name")
         indirect_cell = sheet1.easy_indirect_cell("Age", "Name")
-        self.assertEqual(indirect_cell, 'INDIRECT("RC[-2]",0)')
-        # positive test
+        self.assertEqual(indirect_cell, 'INDIRECT("RC[-3]",0)')
+
+    def test_easy_indirect_cell_pos(self):
+        """
+        Positive test for easy_indirect_cell func.
+        """
+        excel_obj = Excel(filename="test\excel_test.xlsx")
+        sheet1 = Sheet(excel_obj, "Name")
         indirect_cell = sheet1.easy_indirect_cell("Name", "Age")
-        self.assertEqual(indirect_cell, 'INDIRECT("RC[2]",0)')
+        self.assertEqual(indirect_cell, 'INDIRECT("RC[3]",0)')
 
 
 class TestUpdateAndGet(unittest.TestCase):
-    def test_update_get_cell(self):
+    def test_get_cell(self):
+        excel_obj = Excel(filename="test\excel_test.xlsx")
+        sheet1 = Sheet(excel_obj, "Name")
+        # verify value
+        self.assertEqual(sheet1.get_cell("Brian", "Birth Month"), "June")
+
+    def test_update_cell(self):
         excel_obj = Excel(filename="test\excel_test.xlsx")
         sheet1 = Sheet(excel_obj, "Name")
         sheet2 = Sheet(excel_obj, "Name", "Sheet 2")
@@ -92,6 +122,28 @@ class TestUpdateAndGet(unittest.TestCase):
         self.assertEqual(sheet1.get_cell("Brian", "Birth Month"), "May")
         # second sheet get_cell test
         self.assertEqual(sheet2.get_cell("Brian", "Birth Month"), "June")
+
+    def test_hyperlink_extraction(self):
+        """
+        Tests non activated formula link.
+        """
+        excel_obj = Excel(filename="test\excel_test.xlsx")
+        sheet3 = Sheet(excel_obj, "Name")
+        # tests
+        url = "Fantastic4.com"
+        formula_link = f'=HYPERLINK("Fantastic4.com","Website")'
+        extracted_url = sheet3.extract_hyperlink(formula_link)
+        self.assertEqual(url, extracted_url)
+
+    def test_get_hyperlink(self):
+        """
+        Tests getting clickable hyperlink.
+        """
+        excel_obj = Excel(filename="test\excel_test.xlsx")
+        sheet3 = Sheet(excel_obj, "Name", "Links")
+        # tests clickable link
+        url = sheet3.get_cell("Tony Stark", "Website")
+        self.assertEqual(url, "https://www.Stark.com/")
 
 
 class TestAddNewLine(unittest.TestCase):
@@ -256,6 +308,7 @@ class TestFormatting(unittest.TestCase):
         answer = {
             "Age": ["default_border", "center_align"],
             "Birth Month": ["default_border", "center_align"],
+            "Birth Year": ["default_border", "center_align"],
             "Name": ["default_border", "center_align"],
         }
         self.assertEqual(formats, answer)
