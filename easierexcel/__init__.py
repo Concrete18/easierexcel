@@ -348,10 +348,12 @@ class Sheet:
 
     def extract_hyperlink(self, cell_value):
         """
-        Extracts the hyperlink target from a cell with the hyperlink formula.
+        Extracts the hyperlink target from a `cell_value` with the hyperlink
+        formula.
 
         This is only needed if excel has not applied the hyperlink yet.
-        This often happens when you click on the cell with the hyperlink formula.
+        This often happens when you click on the cell with the hyperlink
+        formula.
         """
         if not cell_value:
             raise "Cell Value is None"
@@ -428,15 +430,11 @@ class Sheet:
     def add_new_line(
         self,
         cell_dict: dict,
-        column_key: str,
         save: bool = False,
     ):
         """
-        Adds the given dictionary, as `cell_dict`, onto a new line
-        within the excel sheet.
-
-        column_key is required to update the current index so the new line
-        can be modified without reloading the sheet.
+        Adds cell_dict onto a new line within the excel sheet.
+        The column_name must be given a value.
 
         If dictionary keys match existing columns within the set sheet,
         it will add the value to that column.
@@ -451,12 +449,19 @@ class Sheet:
                 self.missing_columns.append(col)
                 msg = f"add_new_line: Missing {col} in {self.sheet_name} sheet"
                 self.excel.log(msg, "warning")
+        column_key = None
         append_list = []
         for col in self.col_idx:
+            cell_value = cell_dict[col]
+            # gets key for updating the index
+            if self.column_name == col:
+                column_key = cell_value
             if col in cell_dict:
                 append_list.append(cell_dict[col])
             else:
                 append_list.append("")
+        if not column_key:
+            raise "column_name value was not given."
         self.cur_sheet.append(append_list)
         self.update_index(column_key)
         if save:
@@ -475,6 +480,7 @@ class Sheet:
             return None
         row = self.row_idx[col_val]
         self.cur_sheet.delete_rows(row)
+        self.row_idx.pop(col_val)  # removes index of row from row_idx
         self.excel.changes_made = True
         if save:
             self.excel.save(use_print=False, backup=False)
@@ -487,7 +493,7 @@ class Sheet:
         if column_name not in self.col_idx:
             return None
         column = self.col_idx[column_name]
-        self.cur_sheet.delete_column(column)
+        self.cur_sheet.delete_cols(column)
         self.excel.changes_made = True
         return True
 
