@@ -2,7 +2,7 @@
 
 This modules allows for an easy way to get and update cell values ect...
 
-openpyxl is used to do the bulk while easierexcel makes it much easier to use.
+OpenPyXL is used to do the bulk while easierexcel makes it much easier to use.
 
 ## Quick Start
 
@@ -27,6 +27,9 @@ $ pip install easierexcel
 ```python
     from easierexcel import Excel, Sheet
 
+    # class init
+    excel = Excel('example_excel.xlsx')
+
     # formatting options
     options = {
         "shrink_to_fit_cell": True,
@@ -46,9 +49,6 @@ $ pip install easierexcel
         "integer": ["ID", "Number"],
         "date": ["Last Updated", "Date"],
     }
-
-    # class init
-    excel = Excel('example_excel.xlsx')
     example = Sheet(excel, "Name", sheet_name="Example", options=options)
 
     # deleting
@@ -70,7 +70,6 @@ $ pip install easierexcel
 
     example.get_cell("Michael", "Birth Month") # -> April
 
-
     excel.save() # Saves the excel file
 ```
 
@@ -86,21 +85,86 @@ $ pip install easierexcel
 
 ## Documentation
 
-### Excel
+### Excel Class
 
-- log
-- save
-- open_excel
-- open_file_input
+Excel class is comprised of the excel object that us used to open sheets with the Sheet class.
 
-### Sheet
+#### Saving Excel
 
-- get_cell
-- update_cell
-- add_new_line
-- delete_row
-- delete_column
-- format_header
-- format_cell
-- format_row
-- format_all_cells
+Saves the Excel file with a status messages (optional) and backup (optional).
+It will only save if changes were detected unless force_save is enabled.
+
+```python
+def save(
+    self,
+    use_print: bool = True, # enables status messages
+    force_save: bool = False, # force save regardless if changes were detected
+    backup: bool = True, # enables excel file backup before save
+):
+```
+
+#### log
+
+<!-- TODO think about changing this -->
+
+```python
+def log(self,
+    msg: str, # log message
+    type: str = "info" # log type
+):
+```
+
+#### Opening the Excel File
+
+Opens the Excel file in Excel. It will save if changes were made before opening.
+
+```python
+def open_excel(
+    self,
+    save: bool = True # Save before opening the excel doc
+):
+```
+
+#### open_file_input
+
+WIP
+
+### Sheet Class
+
+WIP
+
+#### get_cell
+
+WIP
+
+#### update_cell
+
+WIP
+
+#### add_new_line
+
+WIP
+
+#### delete_row
+
+WIP
+
+#### delete_column
+
+WIP
+
+#### format_header
+
+WIP
+
+#### format_cell
+
+WIP
+
+#### format_row
+
+WIP
+
+#### format_all_cells
+
+WIP
