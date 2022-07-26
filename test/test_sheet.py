@@ -2,17 +2,10 @@ import pandas as pd
 import unittest
 
 # classes
-from easierexcel.excel import Excel, Sheet
+from easierexcel import Excel, Sheet
 
 
-class TestSheet(unittest.TestCase):
-    def test_get_column_index(self):
-        excel_obj = Excel(filename="test\excel_test.xlsx")
-        sheet1 = Sheet(excel_obj, "Name")
-        self.assertEqual(
-            sheet1.get_column_index(), {"Name": 1, "Birth Month": 2, "Age": 3}
-        )
-
+class TestListInString(unittest.TestCase):
     def test_list_in_string(self):
         excel_obj = Excel(filename="test\excel_test.xlsx")
         sheet1 = Sheet(excel_obj, "Name")
@@ -44,14 +37,31 @@ class TestSheet(unittest.TestCase):
         self.assertFalse(sheet1.list_in_string(test_list, test_string, lowercase=False))
         self.assertFalse(sheet1.list_in_string(test_list, "Bateman"))
 
+
+class TestGetIndex(unittest.TestCase):
+    def test_get_column_index(self):
+        excel_obj = Excel(filename="test\excel_test.xlsx")
+        sheet1 = Sheet(excel_obj, "Name")
+        column_index = sheet1.get_column_index()
+        col_index_ans = {"Name": 1, "Birth Month": 2, "Age": 3}
+        self.assertEqual(column_index, col_index_ans)
+
     def test_get_row_index(self):
         excel_obj = Excel(filename="test\excel_test.xlsx")
         sheet1 = Sheet(excel_obj, "Name")
-        self.assertEqual(
-            sheet1.get_row_index("Name"),
-            {"Michael": 2, "John": 3, "Brian": 4, "Allison": 5, "Daniel": 6, "Rob": 7},
-        )
+        row_index = sheet1.get_row_index("Name")
+        row_index_ans = {
+            "Michael": 2,
+            "John": 3,
+            "Brian": 4,
+            "Allison": 5,
+            "Daniel": 6,
+            "Rob": 7,
+        }
+        self.assertEqual(row_index, row_index_ans)
 
+
+class TestIndirectCell(unittest.TestCase):
     def test_indirect_cell(self):
         excel_obj = Excel(filename="test\excel_test.xlsx")
         sheet1 = Sheet(excel_obj, "Name")
@@ -61,40 +71,58 @@ class TestSheet(unittest.TestCase):
     def test_easy_indirect_cell(self):
         excel_obj = Excel(filename="test\excel_test.xlsx")
         sheet1 = Sheet(excel_obj, "Name")
-        self.assertEqual(
-            sheet1.easy_indirect_cell("Age", "Name"), 'INDIRECT("RC[-2]",0)'
-        )
-        self.assertEqual(
-            sheet1.easy_indirect_cell("Name", "Age"), 'INDIRECT("RC[2]",0)'
-        )
+        # negative test
+        indirect_cell = sheet1.easy_indirect_cell("Age", "Name")
+        self.assertEqual(indirect_cell, 'INDIRECT("RC[-2]",0)')
+        # positive test
+        indirect_cell = sheet1.easy_indirect_cell("Name", "Age")
+        self.assertEqual(indirect_cell, 'INDIRECT("RC[2]",0)')
 
+
+class TestUpdateAndGet(unittest.TestCase):
     def test_update_get_cell(self):
         excel_obj = Excel(filename="test\excel_test.xlsx")
         sheet1 = Sheet(excel_obj, "Name")
         sheet2 = Sheet(excel_obj, "Name", "Sheet 2")
+        # verify value
         self.assertEqual(sheet1.get_cell("Brian", "Birth Month"), "June")
-        self.assertEqual(
-            sheet1.update_cell("Brian", "Birth Month", "May"),
-            True,
-        )
+        # update value
+        self.assertTrue(sheet1.update_cell("Brian", "Birth Month", "May"))
+        # verify change
         self.assertEqual(sheet1.get_cell("Brian", "Birth Month"), "May")
+        # second sheet get_cell test
         self.assertEqual(sheet2.get_cell("Brian", "Birth Month"), "June")
 
+
+class TestAddNewLine(unittest.TestCase):
     def test_add_new_line(self):
         # TODO Complete test
         excel_obj = Excel(filename="test\excel_test.xlsx")
         sheet1 = Sheet(excel_obj, "Name")
 
+        sheet1.add_new_line()
+        self.assertEqual(sheet1.get_cell("Brian", "Birth Month"), "June")
+
+
+class TestDelete(unittest.TestCase):
     def test_delete_by_row(self):
         # TODO Complete test
         excel_obj = Excel(filename="test\excel_test.xlsx")
         sheet1 = Sheet(excel_obj, "Name")
+        self.assertEqual(sheet1.get_cell("Brian", "Birth Month"), "June")
+        sheet1.delete_row("Brian")
+        self.assertFalse(sheet1.get_cell("Brian", "Birth Month"))
 
     def test_delete_by_column(self):
         # TODO Complete test
         excel_obj = Excel(filename="test\excel_test.xlsx")
         sheet1 = Sheet(excel_obj, "Name")
+        self.assertEqual(sheet1.get_cell("Brian", "Age"), 33)
+        sheet1.delete_column("Age")
+        self.assertFalse(sheet1.get_cell("Brian", "Age"))
 
+
+class TestFormatting(unittest.TestCase):
     def test_format_picker(self):
         excel_obj = Excel(filename="test\excel_test.xlsx")
         options = {
@@ -234,6 +262,8 @@ class TestSheet(unittest.TestCase):
         }
         self.assertEqual(formats, answer)
 
+
+class TestDataFrame(unittest.TestCase):
     def test_create_dataframe(self):
         excel_obj = Excel(filename="test\excel_test.xlsx")
         sheet1 = Sheet(excel_obj, "Name")
