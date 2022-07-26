@@ -66,7 +66,7 @@ $ pip install easierexcel
     # accessing and updating
     example.get_cell("Michael", "Birth Month") # -> June
 
-    example.get_cell("Michael", "Birth Month", "April")
+    example.update_cell("Michael", "Birth Month", "April")
 
     example.get_cell("Michael", "Birth Month") # -> April
 
