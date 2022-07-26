@@ -361,7 +361,7 @@ class Sheet:
             split = cell_value.split('"')
             return split[1]
         else:
-            return cell_value
+            return False
 
     def get_cell(self, row_value: str or int, column_value: str or int):
         """
@@ -376,6 +376,12 @@ class Sheet:
             cell = self.cur_sheet.cell(row=row_k, column=col_k)
             if cell.hyperlink:
                 return cell.hyperlink.target
+            if type(cell.value) is str:
+                # TODO add better regex test
+                if "=HYPERLINK" in cell.value:
+                    link = self.extract_hyperlink(cell.value)
+                    if link:
+                        return link
             return self.cur_sheet.cell(row=row_k, column=col_k).value
         else:
             return None
@@ -384,6 +390,7 @@ class Sheet:
         """
         Updates the current row with the `column_key` in the row_idx variable.
         """
+        # TODO add test for this
         self.row_idx[column_key] = self.cur_sheet._current_row
 
     def update_cell(
@@ -452,10 +459,11 @@ class Sheet:
         column_key = None
         append_list = []
         for col in self.col_idx:
-            cell_value = cell_dict[col]
-            # gets key for updating the index
-            if self.column_name == col:
-                column_key = cell_value
+            if col in cell_dict.keys():
+                cell_value = cell_dict[col]
+                # gets key for updating the index
+                if self.column_name == col:
+                    column_key = cell_value
             if col in cell_dict:
                 append_list.append(cell_dict[col])
             else:
@@ -632,6 +640,7 @@ class Sheet:
         """
         Formats a cell based on the `column` name using `row_i` and `col_i`.
         """
+        # TODO add test for this
         cell = self.cur_sheet.cell(row=row_i, column=col_i)
         # gets format_actions if it has not be set yet
         if not self.column_formats:
@@ -678,6 +687,7 @@ class Sheet:
         """
         Formats the entire row by `row_identifier`
         """
+        # TODO add test for this
         if not row_identifier:
             raise "Row identifier was not give."
         for column in self.col_idx.keys():
@@ -690,6 +700,7 @@ class Sheet:
         Auto formats all cells.
         TODO check for a way to make it use openpyxl more
         """
+        # TODO add test for this
         # return early if options is not valid
         if not self.options:
             return False
