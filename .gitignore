@@ -132,3 +132,4 @@ dmypy.json
 .vscode
 classes
 update_package.bat
+*.bak
