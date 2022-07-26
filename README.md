@@ -61,7 +61,7 @@ $ pip install easierexcel
         "Birth Month":"December",
         "Age":5,
     }
-    example.add_new_line(cell_dict=data, column_key="Name")
+    example.add_new_line(cell_dict=data)
 
     # accessing and updating
     example.get_cell("Michael", "Birth Month") # -> June
