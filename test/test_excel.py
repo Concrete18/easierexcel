@@ -1,7 +1,23 @@
 import unittest
+from pathlib import Path
 
 # classes
 from easierexcel import Excel, Sheet
+
+
+class Init(unittest.TestCase):
+    def test_success(self):
+        """
+        ph
+        """
+        self.excel_obj = Excel(filename="test\excel_test.xlsx")
+        self.assertIsInstance(self.excel_obj, Excel)
+
+    def test_file_no_longer_exists(self):
+        """
+        ph
+        """
+        self.assertRaises(Exception, Excel, filename="test/fake_excel.xlsx")
 
 
 class Save(unittest.TestCase):
@@ -22,6 +38,13 @@ class Save(unittest.TestCase):
         sheet3 = Sheet(excel_obj, "Name")
         self.assertEqual(sheet3.get_cell("Brian", "Birth Month"), "June")
 
+    def test_file_no_longer_exists(self):
+        """
+        Verifies that nothing is saved if nothing was changed beforehand.
+        """
+        self.excel_obj.file_path = Path("not_real")
+        self.assertRaises(Exception, self.excel_obj.save)
+
     def test_uneeded_save(self):
         """
         Verifies that nothing is saved if nothing was changed beforehand.
@@ -34,20 +57,20 @@ class Save(unittest.TestCase):
         pass
 
 
-class AskToOpen(unittest.TestCase):
-    def setUp(self):
-        self.excel_obj = Excel(filename="test\excel_test.xlsx")
+# class AskToOpen(unittest.TestCase):
+#     def setUp(self):
+#         self.excel_obj = Excel(filename="test\excel_test.xlsx")
 
-    # TODO add test for the rest of open_excel
-    def test_open_excel(self):
+#     # TODO add test for the rest of open_excel
+#     def test_open_excel(self):
 
-        # tests for exit code at the end of function
-        with self.assertRaises(SystemExit):
-            self.excel_obj.open_excel(test=True)
+#         # tests for exit code at the end of function
+#         with self.assertRaises(SystemExit):
+#             self.excel_obj.open_excel(test=True)
 
-        # tests for no exit code at the end of function
-        result = self.excel_obj.open_excel(test=True, exit_after=False)
-        self.assertFalse(result)
+#         # tests for no exit code at the end of function
+#         result = self.excel_obj.open_excel(test=True, exit_after=False)
+#         self.assertFalse(result)
 
 
 # class AskToOpen(unittest.TestCase):

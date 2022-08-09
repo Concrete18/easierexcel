@@ -5,6 +5,24 @@ import unittest
 from easierexcel import Excel, Sheet
 
 
+class Init(unittest.TestCase):
+    def setUp(self):
+        self.excel_obj = Excel(filename="test\excel_test.xlsx")
+
+    def test_success(self):
+        """
+        ph
+        """
+        self.sheet1 = Sheet(self.excel_obj, "Name")
+        self.assertIsInstance(self.sheet1, Sheet)
+
+    def test_file_no_longer_exists(self):
+        """
+        ph
+        """
+        self.assertRaises(Exception, Sheet, self.excel_obj, "Name", sheet_name="none")
+
+
 class ListInString(unittest.TestCase):
     def setUp(self):
         self.excel_obj = Excel(filename="test\excel_test.xlsx")
@@ -134,27 +152,14 @@ class UpdateAndGet(unittest.TestCase):
         """
         ph
         """
-        # verify value
+        # verify startomg value
         self.assertEqual(self.sheet1.get_cell("Brian", "Birth Month"), "June")
         # update value
         self.assertTrue(self.sheet1.update_cell("Brian", "Birth Month", "May"))
-        # verify change
+        # verify changed value
         self.assertEqual(self.sheet1.get_cell("Brian", "Birth Month"), "May")
         # checks for changes made to be True because it has not been saved yet
         self.assertTrue(self.excel_obj.changes_made)
-
-    def test_update_cell_save(self):
-        """
-        ph
-        """
-        # verify value
-        res = self.sheet1.get_cell("Brian", "Birth Month")
-        self.assertEqual(res, "June")
-        # update value
-        res = self.sheet1.update_cell("Brian", "Birth Month", "May", save=True)
-        self.assertTrue(res)
-        # checks for changes made to be False due to changes being saved already
-        self.assertFalse(self.excel_obj.changes_made)
 
     def test_hyperlink_extraction(self):
         """
@@ -199,14 +204,6 @@ class AddNewLine(unittest.TestCase):
         self.assertEqual(self.sheet1.get_cell("Donna", "Birth Month"), "October")
         self.assertEqual(self.sheet1.get_cell("Donna", "Age"), 12)
         self.assertTrue(self.excel_obj.changes_made)
-
-    def test_add_new_line_save(self):
-        """
-        ph
-        """
-        cell_dict = {"Name": "Donna", "Birth Month": "October", "Age": 12}
-        self.sheet1.add_new_line(cell_dict, save=True)
-        self.assertFalse(self.excel_obj.changes_made)
 
     def test_add_new_line_ValueError(self):
         """
