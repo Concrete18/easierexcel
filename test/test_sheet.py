@@ -5,10 +5,12 @@ import unittest
 from easierexcel import Excel, Sheet
 
 
-class TestListInString(unittest.TestCase):
+class ListInString(unittest.TestCase):
+    def setUp(self):
+        self.excel_obj = Excel(filename="test\excel_test.xlsx")
+        self.sheet1 = Sheet(self.excel_obj, "Name")
+
     def test_true(self):
-        excel_obj = Excel(filename="test\excel_test.xlsx")
-        sheet1 = Sheet(excel_obj, "Name")
         tests = {
             "testing this out": [
                 "testing this out",
@@ -27,33 +29,35 @@ class TestListInString(unittest.TestCase):
             ],
         }
         for string, list in tests.items():
-            self.assertTrue(sheet1.list_in_string(list, string))
+            result = self.sheet1.list_in_string(list, string)
+            with self.subTest(result=result):
+                self.assertTrue(result)
 
     def test_false(self):
-        excel_obj = Excel(filename="test\excel_test.xlsx")
-        sheet1 = Sheet(excel_obj, "Name")
         test_string = ""
         test_list = [
             "testing this out",
             "this is not needed",
             "DID I BLINK?",
         ]
-        self.assertFalse(sheet1.list_in_string(test_list, test_string, lowercase=False))
-        self.assertFalse(sheet1.list_in_string(test_list, "Bateman"))
+        result = self.sheet1.list_in_string(test_list, test_string, lowercase=False)
+        self.assertFalse(result)
+        result = self.sheet1.list_in_string(test_list, "Bateman")
+        self.assertFalse(result)
 
 
-class TestGetIndex(unittest.TestCase):
+class GetIndex(unittest.TestCase):
+    def setUp(self):
+        self.excel_obj = Excel(filename="test\excel_test.xlsx")
+        self.sheet1 = Sheet(self.excel_obj, "Name")
+
     def test_get_column_index(self):
-        excel_obj = Excel(filename="test\excel_test.xlsx")
-        sheet1 = Sheet(excel_obj, "Name")
-        column_index = sheet1.get_column_index()
+        column_index = self.sheet1.get_column_index()
         col_index_ans = {"Name": 1, "Birth Month": 2, "Birth Year": 3, "Age": 4}
         self.assertEqual(column_index, col_index_ans)
 
     def test_get_row_index(self):
-        excel_obj = Excel(filename="test\excel_test.xlsx")
-        sheet1 = Sheet(excel_obj, "Name")
-        row_index = sheet1.get_row_index("Name")
+        row_index = self.sheet1.get_row_index("Name")
         row_index_ans = {
             "Michael": 2,
             "John": 3,
@@ -65,116 +69,178 @@ class TestGetIndex(unittest.TestCase):
         self.assertEqual(row_index, row_index_ans)
 
 
-class TestIndirectCell(unittest.TestCase):
+class IndirectCell(unittest.TestCase):
+    def setUp(self):
+        self.excel_obj = Excel(filename="test\excel_test.xlsx")
+        self.sheet1 = Sheet(self.excel_obj, "Name")
+
     def test_indirect_cell_pos(self):
         """
         Positive test for indirect_cell func.
         """
-        excel_obj = Excel(filename="test\excel_test.xlsx")
-        sheet1 = Sheet(excel_obj, "Name")
-        indirect_cell = sheet1.indirect_cell(left=7)
+        indirect_cell = self.sheet1.indirect_cell(left=7)
         self.assertEqual(indirect_cell, 'INDIRECT("RC[-7]",0)')
 
     def test_indirect_cell_neg(self):
         """
         Negative test for indirect_cell func.
         """
-        excel_obj = Excel(filename="test\excel_test.xlsx")
-        sheet1 = Sheet(excel_obj, "Name")
-        indirect_cell = sheet1.indirect_cell(right=5)
+        indirect_cell = self.sheet1.indirect_cell(right=5)
         self.assertEqual(indirect_cell, 'INDIRECT("RC[5]",0)')
 
-    def test_easy_indirect_cell_neg(self):
+    def test_indirect_cell_manual(self):
         """
-        Negative test for easy_indirect_cell func.
+        Manual setting test for indirect_cell func.
         """
-        excel_obj = Excel(filename="test\excel_test.xlsx")
-        sheet1 = Sheet(excel_obj, "Name")
-        indirect_cell = sheet1.easy_indirect_cell("Age", "Name")
-        self.assertEqual(indirect_cell, 'INDIRECT("RC[-3]",0)')
+        indirect_cell = self.sheet1.indirect_cell(manual_set=-5)
+        self.assertEqual(indirect_cell, 'INDIRECT("RC[-5]",0)')
+
+    def test_indirect_cell_invalid(self):
+        """
+        invalid args test for indirect_cell func.
+        """
+        self.assertRaises(Exception, self.sheet1.indirect_cell, right=5, left=5)
 
     def test_easy_indirect_cell_pos(self):
         """
         Positive test for easy_indirect_cell func.
         """
-        excel_obj = Excel(filename="test\excel_test.xlsx")
-        sheet1 = Sheet(excel_obj, "Name")
-        indirect_cell = sheet1.easy_indirect_cell("Name", "Age")
+        indirect_cell = self.sheet1.easy_indirect_cell("Name", "Age")
         self.assertEqual(indirect_cell, 'INDIRECT("RC[3]",0)')
 
+    def test_easy_indirect_cell_neg(self):
+        """
+        Negative test for easy_indirect_cell func.
+        """
+        indirect_cell = self.sheet1.easy_indirect_cell("Age", "Name")
+        self.assertEqual(indirect_cell, 'INDIRECT("RC[-3]",0)')
 
-class TestUpdateAndGet(unittest.TestCase):
+
+class UpdateAndGet(unittest.TestCase):
+    def setUp(self):
+        self.excel_obj = Excel(filename="test\excel_test.xlsx")
+        self.sheet1 = Sheet(self.excel_obj, "Name")
+        self.sheet2 = Sheet(self.excel_obj, "Name", "Sheet 2")
+        self.sheet3 = Sheet(self.excel_obj, "Name", "Links")
+
     def test_get_cell(self):
-        excel_obj = Excel(filename="test\excel_test.xlsx")
-        sheet1 = Sheet(excel_obj, "Name")
-        # verify value
-        self.assertEqual(sheet1.get_cell("Brian", "Birth Month"), "June")
+        """
+        ph
+        """
+        self.assertEqual(self.sheet1.get_cell("Brian", "Birth Month"), "June")
+        self.assertEqual(self.sheet2.get_cell("Brian", "Birth Month"), "June")
 
     def test_update_cell(self):
-        excel_obj = Excel(filename="test\excel_test.xlsx")
-        sheet1 = Sheet(excel_obj, "Name")
-        sheet2 = Sheet(excel_obj, "Name", "Sheet 2")
+        """
+        ph
+        """
         # verify value
-        self.assertEqual(sheet1.get_cell("Brian", "Birth Month"), "June")
+        self.assertEqual(self.sheet1.get_cell("Brian", "Birth Month"), "June")
         # update value
-        self.assertTrue(sheet1.update_cell("Brian", "Birth Month", "May"))
+        self.assertTrue(self.sheet1.update_cell("Brian", "Birth Month", "May"))
         # verify change
-        self.assertEqual(sheet1.get_cell("Brian", "Birth Month"), "May")
-        # second sheet get_cell test
-        self.assertEqual(sheet2.get_cell("Brian", "Birth Month"), "June")
+        self.assertEqual(self.sheet1.get_cell("Brian", "Birth Month"), "May")
+        # checks for changes made to be True because it has not been saved yet
+        self.assertTrue(self.excel_obj.changes_made)
+
+    def test_update_cell_save(self):
+        """
+        ph
+        """
+        # verify value
+        res = self.sheet1.get_cell("Brian", "Birth Month")
+        self.assertEqual(res, "June")
+        # update value
+        res = self.sheet1.update_cell("Brian", "Birth Month", "May", save=True)
+        self.assertTrue(res)
+        # checks for changes made to be False due to changes being saved already
+        self.assertFalse(self.excel_obj.changes_made)
 
     def test_hyperlink_extraction(self):
         """
         Tests non activated formula link.
         """
-        excel_obj = Excel(filename="test\excel_test.xlsx")
-        sheet3 = Sheet(excel_obj, "Name")
-        # tests
         url = "Fantastic4.com"
         formula_link = f'=HYPERLINK("Fantastic4.com","Website")'
-        extracted_url = sheet3.extract_hyperlink(formula_link)
+        extracted_url = self.sheet3.extract_hyperlink(formula_link)
         self.assertEqual(url, extracted_url)
 
     def test_get_hyperlink(self):
         """
         Tests getting clickable hyperlink.
         """
-        excel_obj = Excel(filename="test\excel_test.xlsx")
-        sheet3 = Sheet(excel_obj, "Name", "Links")
-        # tests clickable link
-        url = sheet3.get_cell("Tony Stark", "Website")
+        url = self.sheet3.get_cell("Tony Stark", "Website")
         self.assertEqual(url, "https://www.Stark.com/")
 
+    def test_get_hyperlink_TypeError(self):
+        """
+        Tests getting clickable hyperlink.
+        """
+        self.assertRaises(TypeError, self.sheet3.extract_hyperlink, None)
 
-class TestAddNewLine(unittest.TestCase):
+    def test_get_hyperlink_ValueError(self):
+        """
+        Tests getting clickable hyperlink.
+        """
+        self.assertRaises(ValueError, self.sheet3.extract_hyperlink, "Wrong")
+
+
+class AddNewLine(unittest.TestCase):
+    def setUp(self):
+        self.excel_obj = Excel(filename="test\excel_test.xlsx")
+        self.sheet1 = Sheet(self.excel_obj, "Name")
+
     def test_add_new_line(self):
-        excel_obj = Excel(filename="test\excel_test.xlsx")
-        sheet1 = Sheet(excel_obj, "Name")
+        """
+        ph
+        """
         cell_dict = {"Name": "Donna", "Birth Month": "October", "Age": 12}
-        sheet1.add_new_line(cell_dict)
-        self.assertEqual(sheet1.get_cell("Donna", "Birth Month"), "October")
-        self.assertEqual(sheet1.get_cell("Donna", "Age"), 12)
+        self.sheet1.add_new_line(cell_dict)
+        self.assertEqual(self.sheet1.get_cell("Donna", "Birth Month"), "October")
+        self.assertEqual(self.sheet1.get_cell("Donna", "Age"), 12)
+        self.assertTrue(self.excel_obj.changes_made)
+
+    def test_add_new_line_save(self):
+        """
+        ph
+        """
+        cell_dict = {"Name": "Donna", "Birth Month": "October", "Age": 12}
+        self.sheet1.add_new_line(cell_dict, save=True)
+        self.assertFalse(self.excel_obj.changes_made)
+
+    def test_add_new_line_ValueError(self):
+        """
+        ph
+        """
+        cell_dict = {"Birth Month": "October", "Age": 12}
+        self.assertRaises(ValueError, self.sheet1.add_new_line, cell_dict)
 
 
-class TestDelete(unittest.TestCase):
+class Delete(unittest.TestCase):
+    def setUp(self):
+        self.excel_obj = Excel(filename="test\excel_test.xlsx")
+        self.sheet1 = Sheet(self.excel_obj, "Name")
+
     def test_delete_by_row(self):
-        excel_obj = Excel(filename="test\excel_test.xlsx")
-        sheet1 = Sheet(excel_obj, "Name")
-        self.assertEqual(sheet1.get_cell("Brian", "Birth Month"), "June")
-        sheet1.delete_row("Brian")
-        self.assertFalse(sheet1.get_cell("Brian", "Birth Month"))
+        """
+        ph
+        """
+        self.assertEqual(self.sheet1.get_cell("Brian", "Birth Month"), "June")
+        self.sheet1.delete_row("Brian")
+        self.assertFalse(self.sheet1.get_cell("Brian", "Birth Month"))
 
     def test_delete_by_column(self):
-        excel_obj = Excel(filename="test\excel_test.xlsx")
-        sheet1 = Sheet(excel_obj, "Name")
-        self.assertEqual(sheet1.get_cell("Brian", "Age"), 33)
-        sheet1.delete_column("Age")
-        self.assertFalse(sheet1.get_cell("Brian", "Age"))
+        """
+        ph
+        """
+        self.assertEqual(self.sheet1.get_cell("Brian", "Age"), 33)
+        self.sheet1.delete_column("Age")
+        self.assertFalse(self.sheet1.get_cell("Brian", "Age"))
 
 
-class TestFormatting(unittest.TestCase):
-    def test_format_picker(self):
-        excel_obj = Excel(filename="test\excel_test.xlsx")
+class Formatting(unittest.TestCase):
+    def setUp(self):
+        self.excel_obj = Excel(filename="test\excel_test.xlsx")
         options = {
             "shrink_to_fit_cell": True,
             "light_grey_fill": ["Rating Comparison", "Probable Completion"],
@@ -218,7 +284,12 @@ class TestFormatting(unittest.TestCase):
                 "Date Added",
             ],
         }
-        sheet1 = Sheet(excel_obj, "Name", options=options)
+        self.sheet1 = Sheet(self.excel_obj, "Name", options=options)
+
+    def test_format_picker(self):
+        """
+        ph
+        """
         column_list = {
             "My Rating": ["default_border", "center_align"],
             "Metacritic": ["default_border", "center_align"],
@@ -254,57 +325,16 @@ class TestFormatting(unittest.TestCase):
             "Date Added": ["default_border", "center_align", "date"],
         }
         for entry in column_list.keys():
-            actions = sorted(sheet1.format_picker(entry))
+            actions = sorted(self.sheet1.format_picker(entry))
             answers = sorted(column_list[entry])
-            self.assertEqual(actions, answers)
+            with self.subTest(msg=entry, actions=actions, answers=answers):
+                self.assertEqual(actions, answers)
 
     def test_get_column_formats(self):
-        excel_obj = Excel(filename="test\excel_test.xlsx")
-        options = {
-            "shrink_to_fit_cell": True,
-            "light_grey_fill": ["Rating Comparison", "Probable Completion"],
-            "percent": [
-                "%",
-                "Percent",
-                "Discount",
-                "Rating Comparison",
-                "Probable Completion",
-            ],
-            "currency": ["Price", "MSRP", "Cost"],
-            "integer": ["App ID", "Number", "Release Year"],
-            "count_days": ["Days Till Release", "Days Since Update"],
-            "date": ["Last Updated", "Date"],
-            "decimal": ["Hours Played", "Linux Hours", "Time To Beat in Hours"],
-            "left_align": [
-                "Game Name",
-                "Developers",
-                "Publishers",
-                "Genre",
-            ],
-            "center_align": [
-                "My Rating",
-                "Metacritic",
-                "Rating Comparison",
-                "Play Status",
-                "Platform",
-                "VR Support",
-                "Early Access",
-                "Platform",
-                "Steam Deck Status",
-                "Hours Played",
-                "Linux Hours",
-                "Time To Beat in Hours",
-                "Probable Completion",
-                "Store Link",
-                "Release Year",
-                "App ID",
-                "Days Since Update",
-                "Date Updated",
-                "Date Added",
-            ],
-        }
-        sheet1 = Sheet(excel_obj, "Name", options=options)
-        formats = sheet1.get_column_formats()
+        """
+        ph
+        """
+        formats = self.sheet1.get_column_formats()
         answer = {
             "Age": ["default_border", "center_align"],
             "Birth Month": ["default_border", "center_align"],
@@ -313,15 +343,19 @@ class TestFormatting(unittest.TestCase):
         }
         self.assertEqual(formats, answer)
 
+    def test_format_row_no_arg(self):
+        """
+        ph
+        """
+        self.assertRaises(TypeError, self.sheet1.format_row)
 
-class TestDataFrame(unittest.TestCase):
+
+class DataFrame(unittest.TestCase):
+    def setUp(self):
+        self.excel_obj = Excel(filename="test\excel_test.xlsx")
+        self.sheet1 = Sheet(self.excel_obj, "Name")
+
     def test_create_dataframe(self):
-        excel_obj = Excel(filename="test\excel_test.xlsx")
-        sheet1 = Sheet(excel_obj, "Name")
-        df = sheet1.create_dataframe()
+        df = self.sheet1.create_dataframe()
         self.assertIsInstance(df, dict)
         self.assertIsInstance(df["Sheet 1"], pd.DataFrame)
-
-
-if __name__ == "__main__":
-    unittest.main()
