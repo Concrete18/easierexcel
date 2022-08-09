@@ -1,25 +1,10 @@
+from argparse import ArgumentError
 from logging.handlers import RotatingFileHandler
 import logging as lg
 import shutil, os, sys, time, openpyxl, zipfile
 from openpyxl.styles import Border, Alignment, PatternFill, Font
 from pathlib import Path
 import pandas as pd
-
-
-def benchmark(func):
-    """
-    Prints `func` name and a benchmark for runtime.
-    """
-
-    def wrapped(*args, **kwargs):
-        start = time.perf_counter()
-        value = func(*args, **kwargs)
-        end = time.perf_counter()
-        elapsed = round(end - start, 2)
-        print(f"{func.__name__} Completion Time: {elapsed}")
-        return value
-
-    return wrapped
 
 
 class Excel:
@@ -53,9 +38,8 @@ class Excel:
         try:
             self.wb = openpyxl.load_workbook(self.file_path)
         except zipfile.BadZipFile:
-            response = input(
-                f"Error with {self.file_path}.\nCheck backup to restore backup."
-            )
+            print(f"Error with {self.file_path}.")
+            response = input("Do you want to restore backup?")
             if response in ["yes", "yeah", "y"]:
                 # renames current to .old
                 os.rename(self.file_path, f"{self.file_path}.old")
@@ -77,18 +61,6 @@ class Excel:
         )
         my_handler.setFormatter(log_formatter)
         self.logger.addHandler(my_handler)
-
-    def log(self, msg: str, type: str = "info"):
-        """
-        Logs `msg` with set `type` if `use_logging` is True.
-        """
-        if self.use_logging:
-            if type == "info":
-                self.logger.info(msg)
-            if type == "warning":
-                self.logger.warning(msg)
-            if type == "error":
-                self.logger.error(msg)
 
     def save(
         self,
@@ -115,7 +87,7 @@ class Excel:
                         backup_path = f"{self.file_path}.bak"
                         shutil.copy(self.file_path, backup_path)
                         self.backed_up = True
-                        self.log(f"Excel file backed up", "info")
+                        self.logger.info(f"Excel file backed up")
                 # saves the file once it is closed
                 if use_print:
                     print("\nSaving...")
@@ -139,7 +111,7 @@ class Excel:
                             first_run = False
                         time.sleep(1)
             except KeyboardInterrupt:
-                self.log(f"Save Cancelled", "warning")
+                self.logger.warning("Save Cancelled")
                 if use_print:
                     print("\nCancelling Save")
                 exit()
@@ -149,7 +121,12 @@ class Excel:
                 self.logger.info(msg)
                 print(msg)
 
-    def open_excel(self, save: bool = True):
+    def open_excel(
+        self,
+        save: bool = True,
+        exit_after: bool = True,
+        test: bool = False,
+    ):
         """
         Opens the current excel file if it still exists and then exits.
 
@@ -158,10 +135,13 @@ class Excel:
         if save:
             self.save()
         if self.file_path.exists:
-            os.startfile(self.file_path)
+            if not test:
+                os.startfile(self.file_path)
         else:
+            # TODO raise Error
             print("File no longer exists.")
-        exit()
+        if exit_after:
+            exit()
 
     def open_file_input(self):
         """
@@ -274,7 +254,7 @@ class Sheet:
         elif manual_set != 0:
             num = manual_set
         else:
-            raise "Left and Right can't both be greater then 0."
+            raise Exception("Left and Right args can't both be greater then 0.")
         return f'INDIRECT("RC[{num}]",0)'
 
     def easy_indirect_cell(self, cur_col: str, ref_col: str):
@@ -356,12 +336,12 @@ class Sheet:
         formula.
         """
         if not cell_value:
-            raise "Cell Value is None"
+            raise TypeError("Cell Value is None")
         if "=HYPERLINK(" in cell_value:
             split = cell_value.split('"')
             return split[1]
         else:
-            return False
+            raise ValueError("Cell Value is not an Excel hyperlink")
 
     def get_cell(self, row_value: str or int, column_value: str or int):
         """
@@ -452,6 +432,7 @@ class Sheet:
         """
         # missing column checker
         for col in cell_dict.keys():
+            # TODO decide if this is needed
             if col not in self.col_idx and col not in self.missing_columns:
                 self.missing_columns.append(col)
                 msg = f"add_new_line: Missing {col} in {self.sheet_name} sheet"
@@ -469,7 +450,8 @@ class Sheet:
             else:
                 append_list.append("")
         if not column_key:
-            raise "column_name value was not given."
+            msg = "No Column given matches then sheets column key"
+            raise ValueError(msg)
         self.cur_sheet.append(append_list)
         self.update_index(column_key)
         if save:
@@ -489,12 +471,13 @@ class Sheet:
         row = self.row_idx[col_val]
         self.cur_sheet.delete_rows(row)
         self.row_idx.pop(col_val)  # removes index of row from row_idx
-        self.excel.changes_made = True
         if save:
             self.excel.save(use_print=False, backup=False)
+        else:
+            self.excel.changes_made = True
         return True
 
-    def delete_column(self, column_name: str):
+    def delete_column(self, column_name: str, save: bool = False):
         """
         Deletes column by `column_name`.
         """
@@ -502,7 +485,10 @@ class Sheet:
             return None
         column = self.col_idx[column_name]
         self.cur_sheet.delete_cols(column)
-        self.excel.changes_made = True
+        if save:
+            self.excel.save(use_print=False, backup=False)
+        else:
+            self.excel.changes_made = True
         return True
 
     # formatting
@@ -688,8 +674,6 @@ class Sheet:
         Formats the entire row by `row_identifier`
         """
         # TODO add test for this
-        if not row_identifier:
-            raise "Row identifier was not give."
         for column in self.col_idx.keys():
             row_i = self.row_idx[row_identifier]
             col_i = self.col_idx[column]
