@@ -4,7 +4,7 @@ This modules allows for an easy way to get and update cell values ect...
 
 OpenPyXL is used to do the bulk while easierexcel makes it much easier to use.
 
-Near 100% Test Coverage
+76% Test Coverage
 
 ## Quick Start
 
