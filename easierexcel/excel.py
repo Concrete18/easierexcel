@@ -5,6 +5,9 @@ from pathlib import Path
 
 
 class Excel:
+    """
+    Allows retreiving, adding, updating, deleting and formatting cells within Excel.
+    """
 
     changes_made = False
     backed_up = False
@@ -18,9 +21,6 @@ class Excel:
         log_level=lg.DEBUG,
     ):
         """
-        Allows retreiving, adding, updating, deleting and
-        formatting cells within Excel.
-
         `filename` is the path to the excel file.
 
         `use_logging` allows disabling all logs when running.
@@ -30,21 +30,7 @@ class Excel:
         `log_level` Sets the logging level of this logger.
         level must be an int or a str.
         """
-        # workbook setup
-        self.file_path = Path(filename)
-        try:
-            self.wb = openpyxl.load_workbook(self.file_path)
-        except zipfile.BadZipFile:
-            raise Exception("Excel file is currupted.")
-            # TODO decide if the below should be used or not
-            # testing for this is uncertain
-            # print(f"Error with {self.file_path}.")
-            # response = input("Do you want to restore backup?")
-            # if response in ["yes", "yeah", "y"]:
-            #     # renames current to .old
-            #     os.rename(self.file_path, f"{self.file_path}.old")
-            #     # renames backup to remove .bak
-            #     os.rename(f"{self.file_path}.bak", self.file_path)
+        self.workbook_setup(filename)
         # logger setup
         self.use_logging = use_logging
         datefmt = "%m-%d-%Y %I:%M:%S %p"
@@ -61,6 +47,24 @@ class Excel:
         )
         my_handler.setFormatter(log_formatter)
         self.logger.addHandler(my_handler)
+
+    def workbook_setup(self, filename):
+        # workbook setup
+        self.file_path = Path(filename)
+        try:
+            self.wb = openpyxl.load_workbook(self.file_path)
+        except zipfile.BadZipFile:
+            print(f"Error with {self.file_path}.")
+            response = input("Do you want to restore backup?\n")
+            if response in ["yes", "yeah", "y"]:
+                # renames current to .old
+                os.rename(self.file_path, f"{self.file_path}.old")
+                # copies backup and renames to non backup filename
+                shutil.copy(f"{self.file_path}.bak", self.file_path)
+                # resetup workbook
+                self.wb = openpyxl.load_workbook(self.file_path)
+            else:  # pragma: no cover
+                raise Exception("Excel file is corrupted.")
 
     def save(
         self,
@@ -108,7 +112,7 @@ class Excel:
                                 msg = "Make sure the excel sheet is closed."
                                 print(msg, end="\r")
                             time.sleep(1)
-                    else:
+                    else:  # pragma: no cover
                         print("File no longer exists. Save Cancelled")
                         raise Exception(f"{self.file_path} no longer exists.")
                     first_run = False
@@ -125,7 +129,6 @@ class Excel:
     def open_excel(
         self,
         save: bool = True,
-        exit_after: bool = True,
         test: bool = False,
     ):  # pragma: no cover
         """
@@ -134,28 +137,9 @@ class Excel:
         Saves changes if `save` is True.
         """
         if save:
-            self.save()
+            self.save(use_print=False)
         if self.file_path.exists():
             if not test:
                 os.startfile(self.file_path)
         else:
-            # TODO raise Error
-            print("File no longer exists.")
-        if exit_after:
-            exit()
-
-    def open_file_input(self):  # pragma: no cover
-        """
-        Opens the excel file if it exists after enter is
-        pressed during the input.
-        """
-        if not self.ext_terminal:
-            self.save()
-            exit()
-        try:
-            input("\nPress Enter to open the excel sheet.\n")
-        except KeyboardInterrupt:
-            print("Closing...")
-            self.save()
-            exit()
-        self.open_excel()
+            raise Exception(f"{self.file_path} no longer exists.")
