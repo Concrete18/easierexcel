@@ -1,5 +1,4 @@
 import openpyxl
-from openpyxl.styles import Border, Alignment, PatternFill, Font
 import pandas as pd
 
 
@@ -323,7 +322,7 @@ class Sheet:
         """
         Sets the given `cell` border to cover all sides with the given `style`.
         """
-        cell.border = Border(
+        cell.border = openpyxl.styles.Border(
             left=openpyxl.styles.Side(style=style),
             right=openpyxl.styles.Side(style=style),
             top=openpyxl.styles.Side(style=style),
@@ -340,7 +339,7 @@ class Sheet:
         """
         Sets the given `cell` to have fill with `color` and `fill_type`
         """
-        cell.fill = PatternFill(
+        cell.fill = openpyxl.styles.PatternFill(
             start_color=color,
             end_color=color,
             fill_type=fill_type,
@@ -441,7 +440,7 @@ class Sheet:
         for column in self.col_idx.keys():
             col_i = self.col_idx[column]
             cell = self.cur_sheet.cell(row=1, column=col_i)
-            cell.font = Font(
+            cell.font = openpyxl.styles.Font(
                 name="Calibri",
                 size=font_size,
                 bold=bold_font,
@@ -482,11 +481,11 @@ class Sheet:
             self.set_border(cell)
         # alignment
         if "left_align" in formatting:
-            cell.alignment = Alignment(horizontal="left")
+            cell.alignment = openpyxl.styles.Alignment(horizontal="left")
         elif "center_align" in formatting:
-            cell.alignment = Alignment(horizontal="center")
+            cell.alignment = openpyxl.styles.Alignment(horizontal="center")
         elif "right_align" in formatting:
-            cell.alignment = Alignment(horizontal="right")
+            cell.alignment = openpyxl.styles.Alignment(horizontal="right")
         # fill
         if "black_fill" in formatting:
             self.set_fill(cell, color="fffff")
