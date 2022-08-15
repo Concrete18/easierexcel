@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 # classes
@@ -13,11 +14,13 @@ class Init(unittest.TestCase):
         self.excel_obj = Excel(filename="test\excel_test.xlsx")
         self.assertIsInstance(self.excel_obj, Excel)
 
-    def test_file_no_longer_exists(self):
+    @patch("builtins.input", return_value="n")
+    def test_file_no_longer_exists(self, val):
         """
         ph
         """
-        self.assertRaises(Exception, Excel, filename="test/fake_excel.xlsx")
+        func = self.excel_obj.workbook_setup
+        self.assertRaises(Exception, func, filename="test/fake_excel.xlsx")
 
 
 class Save(unittest.TestCase):
@@ -55,25 +58,3 @@ class Save(unittest.TestCase):
     def test_save_backup(self):
         # TODO test backup
         pass
-
-
-# class AskToOpen(unittest.TestCase):
-#     def setUp(self):
-#         self.excel_obj = Excel(filename="test\excel_test.xlsx")
-
-#     # TODO add test for the rest of open_excel
-#     def test_open_excel(self):
-
-#         # tests for exit code at the end of function
-#         with self.assertRaises(SystemExit):
-#             self.excel_obj.open_excel(test=True)
-
-#         # tests for no exit code at the end of function
-#         result = self.excel_obj.open_excel(test=True, exit_after=False)
-#         self.assertFalse(result)
-
-
-# class AskToOpen(unittest.TestCase):
-#     # TODO Complete test
-#     def test_ask_to_open(self):
-#         print("\n", "ask_to_open")
