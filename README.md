@@ -91,6 +91,18 @@ $ pip install easierexcel
 
 Excel class is comprised of the excel object that us used to open sheets with the Sheet class.
 
+ph
+
+```python
+def __init__(
+    self,
+    filename: str,
+    use_logging: bool = True,
+    log_file: str = "excel.log",
+    log_level=lg.DEBUG,
+):
+```
+
 #### Saving Excel
 
 Saves the Excel file with a status messages (optional) and backup (optional).
@@ -105,17 +117,6 @@ def save(
 ):
 ```
 
-#### log
-
-<!-- TODO think about changing this -->
-
-```python
-def log(self,
-    msg: str, # log message
-    type: str = "info" # log type
-):
-```
-
 #### Opening the Excel File
 
 Opens the Excel file in Excel. It will save if changes were made before opening.
@@ -123,25 +124,76 @@ Opens the Excel file in Excel. It will save if changes were made before opening.
 ```python
 def open_excel(
     self,
-    save: bool = True # Save before opening the excel doc
+    save: bool = True, # Save before opening the excel doc
+    exit_after: bool = True, #
+    test: bool = False, # test mode
 ):
 ```
 
 #### open_file_input
 
-WIP
+Used to bring up a prompt asking if you want to 0pen the excel file. If enter is pressed the file will be opened in excel.
+
+```python
+def open_file_input():
+```
 
 ### Sheet Class
 
-WIP
+Sheet class uses the excel object to create a sheet object of one of the sheets within the excel file. This is used for interacting with any sheet.
+
+```python
+def __init__(
+    self,
+    excel_object: object,
+    column_name: str,
+    sheet_name: str = None,
+    options: dict = None,
+):
+```
+
+The `excel_object` that you created with the Excel class is required to create a sheet object.
+
+The `column_name` is the required name of the main column you are keeping unique for accessing and updating all entries.
+
+The `sheet_name` is the name of the sheet you want to access with this object. If this is blank, you will access the first sheet in the file.
+
+The `options` are used in a object format with key value pairs to determine formmating rules.
 
 #### get_cell
 
-WIP
+Gets the cell value based on the required `row_value` and `column_value`.
+These values can be a string for name of the row or column or an index.
+
+If the cell is a hyperlink that is currently clickable, the hyperlink target will be returned.
+
+```python
+def get_cell(
+    self,
+    row_value: str or int,
+    column_value: str or int):
+```
 
 #### update_cell
 
-WIP
+Updates the cell based on `row_val` and `col_val` to `new_val`.
+
+Returns True if cell was updated and False if it was not updated.
+
+`replace` allows you to determine if a cell will have its
+existing value changed if it is not None.
+
+Saves after change if `save` is True.
+
+```python
+def update_cell(
+    self,
+    row_val: str,
+    col_val: str,
+    new_val: str or int,
+    replace: bool = True,
+):
+```
 
 #### add_new_line
 
