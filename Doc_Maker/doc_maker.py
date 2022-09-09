@@ -16,26 +16,27 @@ class DocMaker:
         for class_data in class_defs:
             # class name
             class_name = class_data.name
-            print(class_name)
             if class_name:
-                doc.write(f"## {class_name}\n")
+                doc.write(f"\n\n## {class_name}\n")
             # class doc string
-            doc_string = ast.get_docstring(class_data)
-            if doc_string:
-                doc.write(f"{doc_string}\n")
+            class_doc = ast.get_docstring(class_data)
+            if class_doc:
+                doc.write(f"{class_doc}\n")
             function_defs = [
                 node for node in class_data.body if isinstance(node, ast.FunctionDef)
             ]
             for f in function_defs:
-                doc_string = ast.get_docstring(f)
-                if not doc_string:
+                func_doc = ast.get_docstring(f)
+                if not func_doc:
                     continue
-                doc.write(f"### {f.name}\n")
-                doc.write("\t" + "\t".join(doc_string.splitlines(True)))
-                # print("\t---")
-                # print("\t" + f.name)
-                # print("\t---")
-                # print("\t" + "\t".join(doc_string.splitlines(True)))
+                # function naming
+                function_name = f.name
+                doc.write(f"\n\n### {function_name}\n")
+                # function info
+                for line in func_doc.splitlines(True):
+                    # write to doc if not a TODO
+                    if "TODO" not in line:
+                        doc.write(line)
 
     def run(self):
         """
@@ -44,7 +45,6 @@ class DocMaker:
         files = [file for file in os.listdir(self.project_path) if ".py" in file]
         with open("Doc_Maker\docs.md", "w") as f:
             for file in files:
-                print(f"Checking in {file}")
                 self.get_docs(os.path.join(self.project_path, file), doc=f)
 
 
