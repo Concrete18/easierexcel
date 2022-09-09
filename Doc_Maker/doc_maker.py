@@ -1,5 +1,4 @@
-import ast
-import os
+import ast, os
 
 
 class DocMaker:
@@ -12,6 +11,7 @@ class DocMaker:
         """
         f = open(file_path, "r")
         module = ast.parse(f.read())
+        # class docs
         class_defs = [node for node in module.body if isinstance(node, ast.ClassDef)]
         for class_data in class_defs:
             # class name
@@ -22,6 +22,7 @@ class DocMaker:
             class_doc = ast.get_docstring(class_data)
             if class_doc:
                 doc.write(f"{class_doc}\n")
+            # function docs
             function_defs = [
                 node for node in class_data.body if isinstance(node, ast.FunctionDef)
             ]
