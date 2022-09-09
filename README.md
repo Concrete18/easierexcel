@@ -89,92 +89,121 @@ $ pip install easierexcel
 
 ### Excel Class
 
-Excel class is comprised of the excel object that us used to open sheets with the Sheet class.
+Allows retreiving, adding, updating, deleting and formatting cells within Excel.
 
-ph
+#### **init** Function
 
-```python
-def __init__(
-    self,
-    filename: str,
-    use_logging: bool = True,
-    log_file: str = "excel.log",
-    log_level=lg.DEBUG,
-):
-```
+`filename` is the path to the excel file.
 
-#### Saving Excel
+`use_logging` allows disabling all logs when running.
 
-Saves the Excel file with a status messages (optional) and backup (optional).
-It will only save if changes were detected unless force_save is enabled.
+`log_file` sets the path for logging.
 
-```python
-def save(
-    self,
-    use_print: bool = True, # enables status messages
-    force_save: bool = False, # force save regardless if changes were detected
-    backup: bool = True, # enables excel file backup before save
-):
-```
+`log_level` Sets the logging level of this logger.
+level must be an int or a str.
 
-#### Opening the Excel File
+#### save Function
 
-Opens the Excel file in Excel. It will save if changes were made before opening.
+`use_print` determines if info for the saving progress will be printed.
 
-```python
-def open_excel(
-    self,
-    save: bool = True, # Save before opening the excel doc
-    exit_after: bool = True, #
-    test: bool = False, # test mode
-):
-```
+`force_save` can be used to make sure a save occurs.
 
-#### open_file_input
+Backs up the excel file before saving the changes if `backup` is True.
 
-Used to bring up a prompt asking if you want to 0pen the excel file. If enter is pressed the file will be opened in excel.
+It will keep trying to save until it completes in case of permission
+errors caused by the file being open.
 
-```python
-def open_file_input():
-```
+#### open_excel Function
+
+Opens the current excel file if it still exists and then exits.
+
+Saves changes if `save` is True.
 
 ### Sheet Class
 
-Sheet class uses the excel object to create a sheet object of one of the sheets within the excel file. This is used for interacting with any sheet.
+#### **init** Function
 
-```python
-def __init__(
-    self,
-    excel_object: object,
-    column_name: str,
-    sheet_name: str = None,
-    options: dict = None,
-):
-```
+Allows interacting with any one sheet within the excel_object given.
 
-The `excel_object` that you created with the Excel class is required to create a sheet object.
+`excel_object` Excel object created using Excel class.
 
-The `column_name` is the required name of the main column you are keeping unique for accessing and updating all entries.
+`column_name` Name of the main column you intend to use for
+identifying rows.
 
-The `sheet_name` is the name of the sheet you want to access with this object. If this is blank, you will access the first sheet in the file.
+`sheet_name` Name of the sheet to use.
 
-The `options` are used in a object format with key value pairs to determine formmating rules.
+`options` used to determine auto formatting.
 
-#### get_cell
+#### create_dataframe Function
 
-Gets the cell value based on the required `row_value` and `column_value`.
-These values can be a string for name of the row or column or an index.
+Creates a panda dataframe using the current used sheet.
 
-If the cell is a hyperlink that is currently clickable, the hyperlink target will be returned.
+`date_cols` sets the columns with dates.
 
-```python
-def get_cell(
-    self,
-    row_value: str or int,
-    column_value: str or int):
-```
+`na_vals` sets what should be considered N/A values that are ignored.
 
-#### update_cell
+#### indirect_cell Function
+
+Returns a string for setting an indirect cell location to
+a number `left` or `right`.
+
+`manual_set` can be used to set the indirect cell offset manually.
+
+Only one direction can be greater than 0.
+
+#### easy_indirect_cell Function
+
+Allows setting up an indirect cell formula.
+
+Set `cur_col`to the column name of the column the formula is going
+into.
+
+Set `ref_col` to the column name of the column you are wanting
+to reference.
+
+#### get_column_index Function
+
+Creates the column index.
+
+#### get_row_index Function
+
+Creates the row index based on `col_name`.
+
+#### list_in_string Function
+
+Returns True if any entry in the given `list` is in the given `string`.
+
+Setting `lowercase` to True allows you to make the check
+set all to lowercase.
+
+#### get_row_col_index Function
+
+Gets the row and column index for the given values if they exist.
+
+Will return the `row_value` and `column_value` if they are
+numbers already.
+
+#### extract_hyperlink Function
+
+Extracts the hyperlink target from a `cell_value` with the hyperlink
+formula.
+
+This is only needed if excel has not applied the hyperlink yet.
+This often happens when you click on the cell with the hyperlink
+formula.
+
+#### get_cell Function
+
+Gets the cell value based on the `row_value` and `column_value`.
+
+If the cell is a hyperlink that is currently clickable,
+the hyperlink target will be returned.
+
+#### update_index Function
+
+Updates the current row with the `column_key` in the row_idx variable.
+
+#### update_cell Function
 
 Updates the cell based on `row_val` and `col_val` to `new_val`.
 
@@ -185,40 +214,60 @@ existing value changed if it is not None.
 
 Saves after change if `save` is True.
 
-```python
-def update_cell(
-    self,
-    row_val: str,
-    col_val: str,
-    new_val: str or int,
-    replace: bool = True,
-):
-```
+#### add_new_line Function
 
-#### add_new_line
+Adds cell_dict onto a new line within the excel sheet.
+The column_name must be given a value.
 
-WIP
+If dictionary keys match existing columns within the set sheet,
+it will add the value to that column.
 
-#### delete_row
+Use `debug` to print info if a column in the `cell_dict` does not exist.
 
-WIP
+Saves after change if `save` is True.
 
-#### delete_column
+#### delete_row Function
 
-WIP
+Deletes row by `column_value`.
 
-#### format_header
+`save` allows you to force a save after deleting a row.
 
-WIP
+#### delete_column Function
 
-#### format_cell
+Deletes column by `column_name`.
 
-WIP
+#### set_border Function
 
-#### format_row
+Sets the given `cell` border to cover all sides with the given `style`.
 
-WIP
+#### set_fill Function
 
-#### format_all_cells
+Sets the given `cell` to have fill with `color` and `fill_type`
 
-WIP
+#### set_style Function
+
+Sets the given `cell` to the given `format` or general by default.
+
+#### format_picker Function
+
+Determines what formatting to apply to a column.
+
+#### get_column_formats Function
+
+Gets the formats to use for each column.
+
+#### format_header Function
+
+Formats the top header of the sheet.
+
+#### format_cell Function
+
+Formats a cell based on the `column` name using `row_i` and `col_i`.
+
+#### format_row Function
+
+Formats the entire row by `row_identifier`
+
+#### format_all_cells Function
+
+Auto formats all cells.

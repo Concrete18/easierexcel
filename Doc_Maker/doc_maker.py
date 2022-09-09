@@ -17,7 +17,7 @@ class DocMaker:
             # class name
             class_name = class_data.name
             if class_name:
-                doc.write(f"\n\n## {class_name}\n")
+                doc.write(f"\n\n### {class_name} Class\n")
             # class doc string
             class_doc = ast.get_docstring(class_data)
             if class_doc:
@@ -31,7 +31,7 @@ class DocMaker:
                     continue
                 # function naming
                 function_name = f.name
-                doc.write(f"\n\n### {function_name}\n")
+                doc.write(f"\n\n#### {function_name} Function\n")
                 # function info
                 for line in func_doc.splitlines(True):
                     # write to doc if not a TODO

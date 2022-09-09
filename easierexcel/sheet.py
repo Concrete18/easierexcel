@@ -86,7 +86,7 @@ class Sheet:
 
         `manual_set` can be used to set the indirect cell offset manually.
 
-        Only one direction can be greater then 0.
+        Only one direction can be greater than 0.
         """
         num = 0
         if left > 0 and right == 0:
@@ -103,7 +103,7 @@ class Sheet:
         """
         Allows setting up an indirect cell formula.
 
-        Set `cur_col`to the column name of the column theformula is going
+        Set `cur_col`to the column name of the column the formula is going
         into.
 
         Set `ref_col` to the column name of the column you are wanting
