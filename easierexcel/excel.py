@@ -73,14 +73,14 @@ class Excel:
         backup: bool = True,
     ):
         """
-        `use_print` determines if info for the saving progress will be printed.
-
-        `force_save` can be used to make sure a save occurs.
-
         Backs up the excel file before saving the changes if `backup` is True.
 
         It will keep trying to save until it completes in case of permission
         errors caused by the file being open.
+
+        `use_print` determines if info for the saving progress will be printed.
+
+        `force_save` can be used to make sure a save occurs.
         """
         if not self.file_path.exists():
             raise Exception(f"{self.file_path} no longer exists.")
@@ -135,6 +135,8 @@ class Excel:
         Opens the current excel file if it still exists and then exits.
 
         Saves changes if `save` is True.
+
+        The `test` arg is only used for testing.
         """
         if save:
             self.save(use_print=False)
