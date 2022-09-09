@@ -12,22 +12,21 @@ class DocMaker:
         """
         f = open(file_path, "r")
         module = ast.parse(f.read())
-        class_definitions = [
-            node for node in module.body if isinstance(node, ast.ClassDef)
-        ]
-        for class_def in class_definitions:
+        class_defs = [node for node in module.body if isinstance(node, ast.ClassDef)]
+        for class_data in class_defs:
             # class name
-            class_name = class_def.name
+            class_name = class_data.name
+            print(class_name)
             if class_name:
                 doc.write(f"## {class_name}\n")
             # class doc string
-            doc_string = ast.get_docstring(class_def)
+            doc_string = ast.get_docstring(class_data)
             if doc_string:
                 doc.write(f"{doc_string}\n")
-            function_definitions = [
-                node for node in class_def.body if isinstance(node, ast.FunctionDef)
+            function_defs = [
+                node for node in class_data.body if isinstance(node, ast.FunctionDef)
             ]
-            for f in function_definitions:
+            for f in function_defs:
                 doc_string = ast.get_docstring(f)
                 if not doc_string:
                     continue
@@ -43,9 +42,9 @@ class DocMaker:
         ph
         """
         files = [file for file in os.listdir(self.project_path) if ".py" in file]
-        print(files)
         with open("Doc_Maker\docs.md", "w") as f:
             for file in files:
+                print(f"Checking in {file}")
                 self.get_docs(os.path.join(self.project_path, file), doc=f)
 
 
