@@ -19,8 +19,7 @@ class Init(unittest.TestCase):
         """
         ph
         """
-        func = self.excel_obj.workbook_setup
-        self.assertRaises(Exception, func, filename="test/fake_excel.xlsx")
+        self.assertRaises(Exception, Excel, filename="test/fake_excel.xlsx")
 
 
 class Save(unittest.TestCase):
