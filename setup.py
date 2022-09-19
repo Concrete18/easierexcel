@@ -10,7 +10,7 @@ classifiers = [
 
 setup(
     name="easierexcel",
-    version="0.9.5",
+    version="0.9.6",
     description="Easy viewing/editing of Excel Files",
     long_description=open("README.md").read(),
     # long_description=open('README.md').read() + '\n\n' + open('CHANGELOG.txt').read(),

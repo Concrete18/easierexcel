@@ -17,7 +17,7 @@ class Excel:
         self,
         filename: str,
         use_logging: bool = True,
-        log_file: str = "excel.log",
+        log_file: str = "logs/excel.log",
         log_level=lg.DEBUG,
     ):
         """
@@ -120,10 +120,8 @@ class Excel:
                 print(f"Cancelled Save.")
                 exit()
         else:
-            if use_print:
-                msg = "Save Skipped due to no changes being made."
-                self.logger.info(msg)
-                print(msg)
+            msg = "Save Skipped due to no changes being made."
+            self.logger.info(msg)
             return False
 
     def open_excel(
