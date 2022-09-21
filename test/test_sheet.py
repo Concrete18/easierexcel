@@ -283,6 +283,20 @@ class Formatting(unittest.TestCase):
         }
         self.sheet1 = Sheet(self.excel_obj, "Name", options=options)
 
+    def test_auto_size_columns(self):
+        """
+        Tests auto_size_columns correctly sizes columns.
+        TODO Verify that test is accurate
+        """
+        # verify current value
+        cur_width = self.sheet1.cur_sheet.column_dimensions["B"].width
+        self.assertEqual(cur_width, 30.7109375)
+        # auto resizes columns
+        self.sheet1.auto_size_columns()
+        # checks for that new size is correct
+        new_width = self.sheet1.cur_sheet.column_dimensions["B"].width
+        self.assertEqual(new_width, 13.53)
+
     def test_format_picker(self):
         """
         ph
