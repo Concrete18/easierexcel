@@ -447,6 +447,17 @@ class Sheet:
                 # color="FF000000",
             )
 
+    def auto_size_columns(self, width_multiplier=1.23, set_height=None):
+        """
+        ph
+        """
+        for col_cells in self.cur_sheet.columns:
+            max_col_len = max(len(str(cell.value)) for cell in col_cells)
+            new_col_lett = openpyxl.utils.get_column_letter(col_cells[0].column)
+            if max_col_len > 0:
+                col_width = max_col_len * width_multiplier
+                self.cur_sheet.column_dimensions[new_col_lett].width = col_width
+
     def format_cell(self, column: str, row_i: int, col_i: int):
         """
         Formats a cell based on the `column` name using `row_i` and `col_i`.
