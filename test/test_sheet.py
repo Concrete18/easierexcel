@@ -92,46 +92,46 @@ class IndirectCell(unittest.TestCase):
         self.excel_obj = Excel(filename="test\excel_test.xlsx")
         self.sheet1 = Sheet(self.excel_obj, "Name")
 
-    def test_indirect_cell_pos(self):
+    def test_left(self):
         """
         Positive test for indirect_cell func.
         """
         indirect_cell = self.sheet1.indirect_cell(left=7)
         self.assertEqual(indirect_cell, 'INDIRECT("RC[-7]",0)')
 
-    def test_indirect_cell_neg(self):
+    def test_right(self):
         """
         Negative test for indirect_cell func.
         """
         indirect_cell = self.sheet1.indirect_cell(right=5)
         self.assertEqual(indirect_cell, 'INDIRECT("RC[5]",0)')
 
-    def test_indirect_cell_manual(self):
+    def test_manual_set(self):
         """
         Manual setting test for indirect_cell func.
         """
         indirect_cell = self.sheet1.indirect_cell(manual_set=-5)
         self.assertEqual(indirect_cell, 'INDIRECT("RC[-5]",0)')
 
-    def test_indirect_cell_invalid(self):
+    def test_relative_pos(self):
         """
-        invalid args test for indirect_cell func.
+        Positive test for indirect_cell func.
         """
-        self.assertRaises(Exception, self.sheet1.indirect_cell, right=5, left=5)
-
-    def test_easy_indirect_cell_pos(self):
-        """
-        Positive test for easy_indirect_cell func.
-        """
-        indirect_cell = self.sheet1.easy_indirect_cell("Name", "Age")
+        indirect_cell = self.sheet1.indirect_cell(cur_col="Name", ref_col="Age")
         self.assertEqual(indirect_cell, 'INDIRECT("RC[3]",0)')
 
-    def test_easy_indirect_cell_neg(self):
+    def test_relative_neg(self):
         """
-        Negative test for easy_indirect_cell func.
+        Negative test for indirect_cell func.
         """
-        indirect_cell = self.sheet1.easy_indirect_cell("Age", "Name")
+        indirect_cell = self.sheet1.indirect_cell(cur_col="Age", ref_col="Name")
         self.assertEqual(indirect_cell, 'INDIRECT("RC[-3]",0)')
+
+    def test_invalid_left_right(self):
+        """
+        invalid left and right args test for indirect_cell func.
+        """
+        self.assertRaises(Exception, self.sheet1.indirect_cell, right=5, left=5)
 
 
 class UpdateAndGet(unittest.TestCase):
