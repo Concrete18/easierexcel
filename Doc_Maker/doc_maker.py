@@ -2,15 +2,21 @@ import ast, os
 
 
 class DocMaker:
-    def __init__(self, project_path):
+    """
+    ph
+    """
+
+    def __init__(self, project_path, python_files=None):
         self.project_path = project_path
+        self.python_files = python_files
 
     def get_docs(self, file_path, doc):
         """
         ph
         """
-        f = open(file_path, "r")
-        module = ast.parse(f.read())
+        with open(file_path, "r") as f:
+            file = f.read()
+        module = ast.parse(file)
         # class docs
         class_defs = [node for node in module.body if isinstance(node, ast.ClassDef)]
         for class_data in class_defs:
@@ -43,11 +49,18 @@ class DocMaker:
         """
         ph
         """
-        files = [file for file in os.listdir(self.project_path) if ".py" in file]
+        if not self.python_files:
+            files = [
+                file for file in os.listdir(self.project_path) if file.endswith(".py")
+            ]
+        else:
+            files = self.python_files
         with open("Doc_Maker\docs.md", "w") as f:
             for file in files:
-                self.get_docs(os.path.join(self.project_path, file), doc=f)
+                file_path = os.path.join(self.project_path, file)
+                self.get_docs(file_path, doc=f)
 
 
-App = DocMaker(project_path="easierexcel")
+files = ["excel.py", "sheet.py"]
+App = DocMaker(project_path="easierexcel", python_files=files)
 App.run()
