@@ -40,6 +40,10 @@ class Excel:
         self.logger = lg.getLogger(__name__)
         self.logger.setLevel(log_level)  # Log Level
         max_gigs = 2
+        # TODO test this
+        if self.use_logging:
+            if not os.path.exists(log_file):
+                os.makedirs(log_file)
         my_handler = RotatingFileHandler(
             log_file,
             maxBytes=max_gigs * 1024 * 1024,
