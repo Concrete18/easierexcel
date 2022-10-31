@@ -78,18 +78,32 @@ class Sheet:
         )
         return df
 
-    @staticmethod
-    def indirect_cell(left: int = 0, right: int = 0, manual_set: int = 0):
+    def indirect_cell(
+        self,
+        cur_col: str = None,
+        ref_col: str = None,
+        left: int = 0,
+        right: int = 0,
+        manual_set: int = 0,
+    ):
         """
-        Returns a string for setting an indirect cell location to
-        a number `left` or `right`.
+        Returns a string for setting an indirect cell location to a cell.
 
-        `manual_set` can be used to set the indirect cell offset manually.
+        If you want the cell to be relative to column names then set `cur_col`
+        to the column name the formula is going into and `ref_col` to the
+        column name you are wanting to reference.
 
-        Only one direction can be greater than 0.
+        If you know it is simply references a cell that is 3 to the right or
+        left then just give `left` or `right` that value. Only one direction
+        can be greater than 0.
+
+        You can also use `manual_set` to set the indirect cell offset manually
+        using a positive or negative number.
         """
         num = 0
-        if left > 0 and right == 0:
+        if ref_col and cur_col:
+            num = self.col_idx[ref_col] - self.col_idx[cur_col]
+        elif left > 0 and right == 0:
             num -= left
         elif right > 0 and left == 0:
             num += right
@@ -98,19 +112,6 @@ class Sheet:
         else:
             raise Exception("Left and Right args can't both be greater then 0.")
         return f'INDIRECT("RC[{num}]",0)'
-
-    def easy_indirect_cell(self, cur_col: str, ref_col: str):
-        """
-        Allows setting up an indirect cell formula.
-
-        Set `cur_col`to the column name of the column the formula is going
-        into.
-
-        Set `ref_col` to the column name of the column you are wanting
-        to reference.
-        """
-        diff = self.col_idx[ref_col] - self.col_idx[cur_col]
-        return self.indirect_cell(manual_set=diff)
 
     def get_column_index(self):
         """
@@ -229,8 +230,6 @@ class Sheet:
 
         `replace` allows you to determine if a cell will have its
         existing value changed if it is not None.
-
-        Saves after change if `save` is True.
         """
         row_key, col_key = self.get_row_col_index(row_val, col_val)
         if row_key is not None and col_key is not None:
@@ -259,10 +258,6 @@ class Sheet:
 
         If dictionary keys match existing columns within the set sheet,
         it will add the value to that column.
-
-        Use `debug` to print info if a column in the `cell_dict` does not exist.
-
-        Saves after change if `save` is True.
         """
         # missing column checker
         for col in cell_dict.keys():
@@ -270,7 +265,7 @@ class Sheet:
             if col not in self.col_idx and col not in self.missing_columns:
                 self.missing_columns.append(col)
                 msg = f"add_new_line: Missing {col} in {self.sheet_name} sheet"
-                self.excel.log(msg, "warning")
+                self.excel.logger.warning(msg)
         column_key = None
         append_list = []
         for col in self.col_idx:
@@ -294,8 +289,6 @@ class Sheet:
     def delete_row(self, col_val: str):
         """
         Deletes row by `column_value`.
-
-        `save` allows you to force a save after deleting a row.
         """
         if col_val not in self.row_idx:
             return None
