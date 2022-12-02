@@ -86,6 +86,11 @@ class GetIndex(unittest.TestCase):
         }
         self.assertEqual(row_index, row_index_ans)
 
+    def test_get_row_col_index(self):
+        row_key, column_key = self.sheet1.get_row_col_index("Brian", "Birth Month")
+        self.assertEqual(row_key, 4)
+        self.assertEqual(column_key, 2)
+
 
 class IndirectCell(unittest.TestCase):
     def setUp(self):
@@ -134,19 +139,75 @@ class IndirectCell(unittest.TestCase):
         self.assertRaises(Exception, self.sheet1.indirect_cell, right=5, left=5)
 
 
-class UpdateAndGet(unittest.TestCase):
+class GetCell(unittest.TestCase):
     def setUp(self):
         self.excel_obj = Excel(filename="test\excel_test.xlsx")
         self.sheet1 = Sheet(self.excel_obj, "Name")
-        self.sheet2 = Sheet(self.excel_obj, "Name", "Sheet 2")
-        self.sheet3 = Sheet(self.excel_obj, "Name", "Links")
+
+    def test_get_cell_by_key(self):
+        """
+        ph
+        """
+        self.assertEqual(self.sheet1.get_cell_by_key(2, 3), 1991)
 
     def test_get_cell(self):
         """
         ph
         """
         self.assertEqual(self.sheet1.get_cell("Brian", "Birth Month"), "June")
-        self.assertEqual(self.sheet2.get_cell("Brian", "Birth Month"), "June")
+
+
+class Hyperlink(unittest.TestCase):
+    def setUp(self):
+        self.excel_obj = Excel(filename="test\excel_test.xlsx")
+        self.sheet2 = Sheet(self.excel_obj, "Name", "Links")
+
+    def test_hyperlink_extraction(self):
+        """
+        Tests non activated formula link.
+        """
+        url = "Fantastic4.com"
+        formula_link = f'=HYPERLINK("Fantastic4.com","Website")'
+        extracted_url = self.sheet2.extract_hyperlink(formula_link)
+        self.assertEqual(url, extracted_url)
+
+    def test_get_hyperlink(self):
+        """
+        Tests getting clickable hyperlink.
+        """
+        url = self.sheet2.get_cell("Tony Stark", "Website")
+        self.assertEqual(url, "https://www.Stark.com/")
+
+    def test_get_hyperlink_TypeError(self):
+        """
+        Tests getting clickable hyperlink.
+        """
+        self.assertRaises(TypeError, self.sheet2.extract_hyperlink, None)
+
+    def test_get_hyperlink_ValueError(self):
+        """
+        Tests getting clickable hyperlink.
+        """
+        self.assertRaises(ValueError, self.sheet2.extract_hyperlink, "Wrong")
+
+
+class UpdateCell(unittest.TestCase):
+    def setUp(self):
+        self.excel_obj = Excel(filename="test\excel_test.xlsx")
+        self.sheet1 = Sheet(self.excel_obj, "Name")
+
+    def test_update_cell_by_key(self):
+        """
+        ph
+        """
+        # verify startomg value
+        self.assertEqual(self.sheet1.get_cell_by_key(4, 2), "June")
+        # update value
+        self.assertTrue(self.sheet1.update_cell_by_key(4, 2, "May"))
+        # verify changed value
+        self.assertEqual(self.sheet1.get_cell_by_key(4, 2), "May")
+        # checks for changes made to be True because it has not been saved yet
+        self.assertTrue(self.excel_obj.changes_made)
 
     def test_update_cell(self):
         """
@@ -160,34 +221,6 @@ class UpdateAndGet(unittest.TestCase):
         self.assertEqual(self.sheet1.get_cell("Brian", "Birth Month"), "May")
         # checks for changes made to be True because it has not been saved yet
         self.assertTrue(self.excel_obj.changes_made)
-
-    def test_hyperlink_extraction(self):
-        """
-        Tests non activated formula link.
-        """
-        url = "Fantastic4.com"
-        formula_link = f'=HYPERLINK("Fantastic4.com","Website")'
-        extracted_url = self.sheet3.extract_hyperlink(formula_link)
-        self.assertEqual(url, extracted_url)
-
-    def test_get_hyperlink(self):
-        """
-        Tests getting clickable hyperlink.
-        """
-        url = self.sheet3.get_cell("Tony Stark", "Website")
-        self.assertEqual(url, "https://www.Stark.com/")
-
-    def test_get_hyperlink_TypeError(self):
-        """
-        Tests getting clickable hyperlink.
-        """
-        self.assertRaises(TypeError, self.sheet3.extract_hyperlink, None)
-
-    def test_get_hyperlink_ValueError(self):
-        """
-        Tests getting clickable hyperlink.
-        """
-        self.assertRaises(ValueError, self.sheet3.extract_hyperlink, "Wrong")
 
 
 class AddNewLine(unittest.TestCase):
