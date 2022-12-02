@@ -186,17 +186,16 @@ class Sheet:
         else:
             raise ValueError("Cell Value is not an Excel hyperlink")
 
-    def get_cell(self, row_value: str or int, column_value: str or int):
+    def get_cell_by_key(self, row_key: int, column_key: int):
         """
-        Gets the cell value based on the `row_value` and `column_value`.
+        Gets the cell value based on the `row_key` and `column_key`.
+        This is basically the index in excel for columns and rows.
 
         If the cell is a hyperlink that is currently clickable,
         the hyperlink target will be returned.
         """
-        row_k, col_k = self.get_row_col_index(row_value, column_value)
-        # gets the value
-        if row_k is not None and col_k is not None:
-            cell = self.cur_sheet.cell(row=row_k, column=col_k)
+        if row_key is not None and column_key is not None:
+            cell = self.cur_sheet.cell(row=row_key, column=column_key)
             if cell.hyperlink:
                 return cell.hyperlink.target
             if type(cell.value) is str:
@@ -205,9 +204,26 @@ class Sheet:
                     link = self.extract_hyperlink(cell.value)
                     if link:
                         return link
-            return self.cur_sheet.cell(row=row_k, column=col_k).value
+            return self.cur_sheet.cell(row=row_key, column=column_key).value
         else:
             return None
+
+    def get_cell(self, row_value: str or int, column_value: str or int):
+        """
+        Gets the cell value based on the `row_value` and `column_value`.
+
+        If the cell is a hyperlink that is currently clickable,
+        the hyperlink target will be returned.
+        """
+        # sets int to str
+        if type(row_value) is int:
+            row_value = str(row_value)
+        if type(column_value) is int:
+            column_value = str(column_value)
+        # get row and column keys
+        row_key, column_key = self.get_row_col_index(row_value, column_value)
+        # returns the cell value
+        return self.get_cell_by_key(row_key, column_key)
 
     def update_index(self, column_key: str):
         """
@@ -216,22 +232,22 @@ class Sheet:
         # TODO add test for this
         self.row_idx[column_key] = self.cur_sheet._current_row
 
-    def update_cell(
+    def update_cell_by_key(
         self,
-        row_val: str,
-        col_val: str,
+        row_key: int,
+        col_key: int,
         new_val: str or int,
         replace: bool = True,
     ):
         """
-        Updates the cell based on `row_val` and `col_val` to `new_val`.
+        Updates the cell based on `row_key` and `col_key` to `new_val`.
+        This is basically the index in excel for columns and rows.
 
         Returns True if cell was updated and False if it was not updated.
 
         `replace` allows you to determine if a cell will have its
         existing value changed if it is not None.
         """
-        row_key, col_key = self.get_row_col_index(row_val, col_val)
         if row_key is not None and col_key is not None:
             cell = self.cur_sheet.cell(row=row_key, column=col_key)
             cur_val = cell.value
@@ -250,6 +266,24 @@ class Sheet:
                 return True
         else:
             return False
+
+    def update_cell(
+        self,
+        row_val: str,
+        col_val: str,
+        new_val: str or int,
+        replace: bool = True,
+    ):
+        """
+        Updates the cell based on `row_val` and `col_val` to `new_val`.
+
+        Returns True if cell was updated and False if it was not updated.
+
+        `replace` allows you to determine if a cell will have its
+        existing value changed if it is not None.
+        """
+        row_key, col_key = self.get_row_col_index(row_val, col_val)
+        return self.update_cell_by_key(row_key, col_key, new_val, replace)
 
     def add_new_line(self, cell_dict: dict):
         """
