@@ -190,6 +190,14 @@ This is only needed if excel has not applied the hyperlink yet.
 This often happens when you click on the cell with the hyperlink
 formula.
 
+#### get_cell_by_key Function
+
+Gets the cell value based on the `row_key` and `column_key`.
+This is basically the index in excel for columns and rows.
+
+If the cell is a hyperlink that is currently clickable,
+the hyperlink target will be returned.
+
 #### get_cell Function
 
 Gets the cell value based on the `row_value` and `column_value`.
@@ -200,6 +208,16 @@ the hyperlink target will be returned.
 #### update_index Function
 
 Updates the current row with the `column_key` in the row_idx variable.
+
+#### update_cell_by_key Function
+
+Updates the cell based on `row_key` and `col_key` to `new_val`.
+This is basically the index in excel for columns and rows.
+
+Returns True if cell was updated and False if it was not updated.
+
+`replace` allows you to determine if a cell will have its
+existing value changed if it is not None.
 
 #### update_cell Function
 
@@ -249,10 +267,6 @@ Gets the formats to use for each column.
 #### format_header Function
 
 Formats the top header of the sheet.
-
-#### auto_size_columns Function
-
-ph
 
 #### format_cell Function
 
