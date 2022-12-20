@@ -83,12 +83,18 @@ class GetIndex(unittest.TestCase):
             "Allison": 5,
             "Daniel": 6,
             "Rob": 7,
+            "123": 8,
         }
         self.assertEqual(row_index, row_index_ans)
 
-    def test_get_row_col_index(self):
+    def test_get_row_col_index_with_str(self):
         row_key, column_key = self.sheet1.get_row_col_index("Brian", "Birth Month")
         self.assertEqual(row_key, 4)
+        self.assertEqual(column_key, 2)
+
+    def test_get_row_col_index_with_int(self):
+        row_key, column_key = self.sheet1.get_row_col_index(123, "Birth Month")
+        self.assertEqual(row_key, 8)
         self.assertEqual(column_key, 2)
 
 

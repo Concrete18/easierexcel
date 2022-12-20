@@ -132,9 +132,9 @@ class Sheet:
         total_rows = len(self.cur_sheet["A"])
         for row in range(1, total_rows):
             column = self.col_idx[col_name]
-            title = self.cur_sheet.cell(row=row + 1, column=column).value
-            if title is not None:
-                row_idx[title] = row + 1
+            cell_value = self.cur_sheet.cell(row=row + 1, column=column).value
+            if cell_value is not None:
+                row_idx[str(cell_value)] = row + 1
         return row_idx
 
     def list_in_string(self, list: list, string: str, lowercase: bool = True):
@@ -157,16 +157,14 @@ class Sheet:
         numbers already.
         """
         row_key, column_key = None, None
+        row_value = str(row_value)
+        column_value = str(column_value)
         # row key setup
-        if type(row_value) == str and row_value in self.row_idx:
+        if row_value in self.row_idx:
             row_key = self.row_idx[row_value]
-        elif type(row_value) == int:
-            row_key = row_value
         # column key setup
-        if type(column_value) == str and column_value in self.col_idx:
+        if column_value in self.col_idx:
             column_key = self.col_idx[column_value]
-        elif type(column_value) == int:
-            column_key = column_value
         return row_key, column_key
 
     def extract_hyperlink(self, cell_value):
@@ -376,12 +374,13 @@ class Sheet:
         """
         Sets the given `cell` to the given `format` or general by default.
         """
-        if format == "percent":
-            cell.style = "Percent"
-        elif format == "currency":
-            cell.style = "Currency"
-        else:
-            cell.style = "General"
+        match format:
+            case "percent":
+                cell.style = "Percent"
+            case "currency":
+                cell.style = "Currency"
+            case _:
+                cell.style = "General"
 
     def format_picker(self, column: str):
         """
