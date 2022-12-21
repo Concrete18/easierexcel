@@ -6,6 +6,8 @@ OpenPyXL is used to do the bulk while easierexcel makes it much easier to use.
 
 76% Test Coverage
 
+Python 3.11+
+
 ## Quick Start
 
 Install easierexcel using pip:
@@ -24,7 +26,7 @@ $ pip install easierexcel
 | Rob     | July        | 34  | null |
 | Allison | September   | 32  | null |
 
-### Code
+### Code Example
 
 ```python
     from easierexcel import Excel, Sheet
