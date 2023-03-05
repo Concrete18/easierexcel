@@ -238,11 +238,13 @@ class AddNewLine(unittest.TestCase):
         """
         ph
         """
+        self.assertEqual(self.sheet1.get_cell("Allison", "Age"), 34)
         cell_dict = {"Name": "Donna", "Birth Month": "October", "Age": 12}
         self.sheet1.add_new_line(cell_dict)
         self.assertEqual(self.sheet1.get_cell("Donna", "Birth Month"), "October")
         self.assertEqual(self.sheet1.get_cell("Donna", "Age"), 12)
         self.assertTrue(self.excel_obj.changes_made)
+        self.assertEqual(self.sheet1.get_cell("Allison", "Age"), 34)
 
     def test_add_new_line_ValueError(self):
         """
@@ -261,17 +263,29 @@ class Delete(unittest.TestCase):
         """
         ph
         """
+        self.assertEqual(self.sheet1.get_cell("Allison", "Birth Month"), "July")
         self.assertEqual(self.sheet1.get_cell("Brian", "Birth Month"), "June")
         self.sheet1.delete_row("Brian")
         self.assertFalse(self.sheet1.get_cell("Brian", "Birth Month"))
+        self.assertEqual(self.sheet1.get_cell("Allison", "Birth Month"), "July")
 
     def test_delete_by_column(self):
         """
         ph
         """
-        self.assertEqual(self.sheet1.get_cell("Brian", "Age"), 33)
-        self.sheet1.delete_column("Age")
-        self.assertFalse(self.sheet1.get_cell("Brian", "Age"))
+        self.assertEqual(self.sheet1.get_cell("Allison", "Age"), 34)
+        self.assertEqual(self.sheet1.get_cell("Brian", "Birth Year"), 1989)
+        self.sheet1.delete_column("Birth Year")
+        self.assertFalse(self.sheet1.get_cell("Brian", "Birth Year"))
+        self.assertEqual(self.sheet1.get_cell("Allison", "Age"), 34)
+
+    def test_clear_cell(self):
+        """
+        ph
+        """
+        self.assertEqual(self.sheet1.get_cell("Brian", "Birth Month"), "June")
+        self.sheet1.clear_cell("Brian", "Birth Month")
+        self.assertEqual(self.sheet1.get_cell("Brian", "Birth Month"), None)
 
 
 class Formatting(unittest.TestCase):

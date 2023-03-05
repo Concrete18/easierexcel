@@ -283,6 +283,17 @@ class Sheet:
         row_key, col_key = self.get_row_col_index(row_val, col_val)
         return self.update_cell_by_key(row_key, col_key, new_val, replace)
 
+    def clear_cell(
+        self,
+        row_val: str,
+        col_val: str,
+    ):
+        """
+        Clears the value of the cell based on `row_val` and `col_val`.
+        """
+        row_key, col_key = self.get_row_col_index(row_val, col_val)
+        return self.update_cell_by_key(row_key, col_key, "", True)
+
     def add_new_line(self, cell_dict: dict):
         """
         Adds cell_dict onto a new line within the excel sheet.
@@ -327,6 +338,7 @@ class Sheet:
         row = self.row_idx[col_val]
         self.cur_sheet.delete_rows(row)
         self.row_idx.pop(col_val)  # removes index of row from row_idx
+        self.row_idx = self.get_row_index(self.column_name)
         self.excel.changes_made = True
         return True
 
@@ -338,6 +350,7 @@ class Sheet:
             return None
         column = self.col_idx[column_name]
         self.cur_sheet.delete_cols(column)
+        self.col_idx = self.get_column_index()
         self.excel.changes_made = True
         return True
 
