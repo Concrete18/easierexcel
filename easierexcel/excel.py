@@ -43,7 +43,9 @@ class Excel:
         # TODO test this
         if self.use_logging:
             if not os.path.exists(log_file):
-                os.makedirs(log_file)
+                os.makedirs(os.path.dirname(log_file), exist_ok=True)
+                with open(log_file, "w") as f:
+                    pass
         my_handler = RotatingFileHandler(
             log_file,
             maxBytes=max_gigs * 1024 * 1024,
