@@ -197,8 +197,7 @@ class Sheet:
             if cell.hyperlink:
                 return cell.hyperlink.target
             if type(cell.value) is str:
-                # TODO add better regex test
-                if "=HYPERLINK" in cell.value:
+                if cell.value.startswith("=HYPERLINK"):
                     link = self.extract_hyperlink(cell.value)
                     if link:
                         return link
@@ -223,12 +222,28 @@ class Sheet:
         # returns the cell value
         return self.get_cell_by_key(row_key, column_key)
 
+    def get_row(self, row_value: str or int):
+        """
+        Gets the row value based on the `row_value`.
+        """
+        # sets int to str
+        if type(row_value) is int:
+            row_value = str(row_value)
+
+        # gets row dict
+        row_dict = {}
+        row_data = self.cur_sheet[self.row_idx[row_value]]
+        for i, entry in enumerate(row_data):
+            columns = list(self.col_idx.keys())
+            row_dict[columns[i]] = entry.value
+        return row_dict
+
     def update_index(self, column_key: str):
         """
         Updates the current row with the `column_key` in the row_idx variable.
         """
         # TODO add test for this
-        self.row_idx[column_key] = self.cur_sheet._current_row
+        self.row_idx[str(column_key)] = self.cur_sheet._current_row
 
     def update_cell_by_key(
         self,
@@ -302,13 +317,6 @@ class Sheet:
         If dictionary keys match existing columns within the set sheet,
         it will add the value to that column.
         """
-        # missing column checker
-        for col in cell_dict.keys():
-            # TODO decide if this is needed
-            if col not in self.col_idx and col not in self.missing_columns:
-                self.missing_columns.append(col)
-                msg = f"add_new_line: Missing {col} in {self.sheet_name} sheet"
-                self.excel.logger.warning(msg)
         column_key = None
         append_list = []
         for col in self.col_idx:
@@ -549,8 +557,8 @@ class Sheet:
         Formats the entire row by `row_identifier`
         """
         # TODO add test for this
+        row_i = self.row_idx[str(row_identifier)]
         for column in self.col_idx.keys():
-            row_i = self.row_idx[row_identifier]
             col_i = self.col_idx[column]
             self.format_cell(column, row_i, col_i)
 

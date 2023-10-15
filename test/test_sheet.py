@@ -150,6 +150,7 @@ class GetCell(unittest.TestCase):
         self.excel_obj = Excel(filename="test\excel_test.xlsx")
         self.sheet1 = Sheet(self.excel_obj, "Name")
 
+    # TODO test hyperlink
     def test_get_cell_by_key(self):
         """
         ph
@@ -161,6 +162,31 @@ class GetCell(unittest.TestCase):
         ph
         """
         self.assertEqual(self.sheet1.get_cell("Brian", "Birth Month"), "June")
+
+    # TODO test int when getting cell
+    def test_get_cell(self):
+        """
+        ph
+        """
+        self.assertEqual(self.sheet1.get_cell("Brian", "Birth Month"), "June")
+
+
+class GetRow(unittest.TestCase):
+    def setUp(self):
+        self.excel_obj = Excel(filename="test\excel_test.xlsx")
+        self.sheet1 = Sheet(self.excel_obj, "Name")
+
+    def test_get_row(self):
+        """
+        ph
+        """
+        row_answer = {
+            "Name": "Brian",
+            "Birth Month": "June",
+            "Birth Year": 1989,
+            "Age": 33,
+        }
+        self.assertEqual(self.sheet1.get_row("Brian"), row_answer)
 
 
 class Hyperlink(unittest.TestCase):
@@ -195,6 +221,24 @@ class Hyperlink(unittest.TestCase):
         Tests getting clickable hyperlink.
         """
         self.assertRaises(ValueError, self.sheet2.extract_hyperlink, "Wrong")
+
+
+class UpdateIndex(unittest.TestCase):
+    def setUp(self):
+        self.excel_obj = Excel(filename="test\excel_test.xlsx")
+        self.sheet1 = Sheet(self.excel_obj, "Name")
+
+    def test_add_new_line(self):
+        """
+        ph
+        """
+        self.assertEqual(self.sheet1.get_cell("Allison", "Age"), 34)
+        cell_dict = {"Name": "Donna", "Birth Month": "October", "Age": 12}
+        self.sheet1.add_new_line(cell_dict)
+        self.assertEqual(self.sheet1.get_cell("Donna", "Birth Month"), "October")
+        self.assertEqual(self.sheet1.get_cell("Donna", "Age"), 12)
+        self.assertTrue(self.excel_obj.changes_made)
+        self.assertEqual(self.sheet1.get_cell("Allison", "Age"), 34)
 
 
 class UpdateCell(unittest.TestCase):
@@ -339,7 +383,7 @@ class Formatting(unittest.TestCase):
     def test_auto_size_columns(self):
         """
         Tests auto_size_columns correctly sizes columns.
-        TODO Verify that test is accurate
+        TODO verify test accuracy
         """
         # verify current value
         cur_width = self.sheet1.cur_sheet.column_dimensions["B"].width
