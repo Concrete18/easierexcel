@@ -170,15 +170,22 @@ class GetCell(unittest.TestCase):
         """
         self.assertEqual(self.sheet1.get_cell("Brian", "Birth Month"), "June")
 
+    def test_invalid(self):
+        """
+        ph
+        """
+        self.assertEqual(self.sheet1.get_cell("Invalid", "Birth Month"), None)
+        self.assertEqual(self.sheet1.get_cell("Brian", "Invalid"), None)
+
 
 class GetRow(unittest.TestCase):
     def setUp(self):
         self.excel_obj = Excel(filename="test\excel_test.xlsx")
         self.sheet1 = Sheet(self.excel_obj, "Name")
 
-    def test_get_row(self):
+    def test_valid(self):
         """
-        ph
+        Tests using get_row with an existing row.
         """
         row_answer = {
             "Name": "Brian",
@@ -187,6 +194,18 @@ class GetRow(unittest.TestCase):
             "Age": 33,
         }
         self.assertEqual(self.sheet1.get_row("Brian"), row_answer)
+
+    def test_invalid(self):
+        """
+        Tests using get_row with an nonexistent row.
+        """
+        row_answer = {
+            "Name": None,
+            "Birth Month": None,
+            "Birth Year": None,
+            "Age": None,
+        }
+        self.assertEqual(self.sheet1.get_row("Invalid"), row_answer)
 
 
 class Hyperlink(unittest.TestCase):

@@ -229,13 +229,15 @@ class Sheet:
         # sets int to str
         if type(row_value) is int:
             row_value = str(row_value)
-
         # gets row dict
         row_dict = {}
-        row_data = self.cur_sheet[self.row_idx[row_value]]
-        for i, entry in enumerate(row_data):
-            columns = list(self.col_idx.keys())
-            row_dict[columns[i]] = entry.value
+        if row_value not in self.row_idx.keys():
+            row_dict = {column: None for column in self.col_idx.keys()}
+        else:
+            row_data = self.cur_sheet[self.row_idx[row_value]]
+            for i, entry in enumerate(row_data):
+                columns = list(self.col_idx.keys())
+                row_dict[columns[i]] = entry.value
         return row_dict
 
     def update_index(self, column_key: str):
