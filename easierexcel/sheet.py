@@ -227,17 +227,15 @@ class Sheet:
         Gets the row value based on the `row_value`.
         """
         # sets int to str
-        if type(row_value) is int:
-            row_value = str(row_value)
+        row_value = str(row_value) if isinstance(row_value, int) else row_value
         # gets row dict
         row_dict = {}
         if row_value not in self.row_idx.keys():
             row_dict = {column: None for column in self.col_idx.keys()}
         else:
             row_data = self.cur_sheet[self.row_idx[row_value]]
-            for i, entry in enumerate(row_data):
-                columns = list(self.col_idx.keys())
-                row_dict[columns[i]] = entry.value
+            columns = list(self.col_idx.keys())
+            row_dict = {col: entry.value for col, entry in zip(columns, row_data)}
         return row_dict
 
     def update_index(self, column_key: str):
@@ -263,24 +261,23 @@ class Sheet:
         `replace` allows you to determine if a cell will have its
         existing value changed if it is not None.
         """
-        if row_key is not None and col_key is not None:
-            cell = self.cur_sheet.cell(row=row_key, column=col_key)
-            cur_val = cell.value
-            # returns False if replace is False and the current value is not none
-            if not replace and cur_val:
-                return False
-            # updates only if cell will actually be changed
-            if new_val == "":
-                new_val = None
-            if cur_val != new_val:
-                # FIXME datetime objects cause issues with this
-                if cell.is_date:
-                    pass
-                self.cur_sheet.cell(row=row_key, column=col_key).value = new_val
-                self.excel.changes_made = True
-                return True
-        else:
+        if not row_key and not col_key:
             return False
+        cell = self.cur_sheet.cell(row=row_key, column=col_key)
+        cur_val = cell.value
+        # returns False if replace is False and the current value is not none
+        if not replace and cur_val:
+            return False
+        # updates only if cell will actually be changed
+        if new_val == "":
+            new_val = None
+        if cur_val != new_val:
+            # FIXME datetime objects cause issues with this
+            if cell.is_date:
+                pass
+            self.cur_sheet.cell(row=row_key, column=col_key).value = new_val
+            self.excel.changes_made = True
+            return True
 
     def update_cell(
         self,
