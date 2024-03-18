@@ -1,5 +1,7 @@
 import openpyxl
+from openpyxl.styles import NamedStyle
 import pandas as pd
+from easierexcel import Excel
 
 
 class Sheet:
@@ -43,6 +45,22 @@ class Sheet:
         # formatting init
         # column format actions init
         self.column_formats = None
+        # custom formats
+
+        # full date
+        if not "full_date_format" in self.wb.named_styles:
+            full_date_format_style = openpyxl.styles.NamedStyle(
+                name="full_date_format", number_format="dddd, mmmm d, yyyy"
+            )
+            self.wb.add_named_style(full_date_format_style)
+
+        # integer with commas
+        if not "comma_format" in self.wb.named_styles:
+            comma_format = NamedStyle(name="comma_format", number_format="#,##0")
+            self.wb.add_named_style(comma_format)
+
+        print(self.wb.named_styles)
+
         # options
         self.options = options
         if not self.options:
@@ -149,7 +167,7 @@ class Sheet:
         else:
             return any(x in string for x in list)
 
-    def get_row_col_index(self, row_value: str or int, column_value: str or int):
+    def get_row_col_index(self, row_value: str | int, column_value: str | int):
         """
         Gets the row and column index for the given values if they exist.
 
@@ -205,7 +223,7 @@ class Sheet:
         else:
             return None
 
-    def get_cell(self, row_value: str or int, column_value: str or int):
+    def get_cell(self, row_value: str | int, column_value: str | int):
         """
         Gets the cell value based on the `row_value` and `column_value`.
 
@@ -222,7 +240,7 @@ class Sheet:
         # returns the cell value
         return self.get_cell_by_key(row_key, column_key)
 
-    def get_row(self, row_value: str or int):
+    def get_row(self, row_value: str | int):
         """
         Gets the row value based on the `row_value`.
         """
@@ -249,7 +267,7 @@ class Sheet:
         self,
         row_key: int,
         col_key: int,
-        new_val: str or int,
+        new_val: str | int,
         replace: bool = True,
     ):
         """
@@ -283,7 +301,7 @@ class Sheet:
         self,
         row_val: str,
         col_val: str,
-        new_val: str or int,
+        new_val: str | int,
         replace: bool = True,
     ):
         """
@@ -329,7 +347,7 @@ class Sheet:
             else:
                 append_list.append("")
         if not column_key:
-            msg = "No Column given matches then sheets column key"
+            msg = "No Column given matches the sheets column key"
             raise ValueError(msg)
         self.cur_sheet.append(append_list)
         self.update_index(column_key)
@@ -402,6 +420,44 @@ class Sheet:
             case _:
                 cell.style = "General"
 
+    def get_style(self, row_value: str | int, column_value: str | int):
+        """
+        Gets the cell value based on the `row_value` and `column_value`.
+
+        If the cell is a hyperlink that is currently clickable,
+        the hyperlink target will be returned.
+        """
+        # sets int to str
+        if type(row_value) is int:
+            row_value = str(row_value)
+        if type(column_value) is int:
+            column_value = str(column_value)
+        # get row and column keys
+        row_key, column_key = self.get_row_col_index(row_value, column_value)
+        # returns the cell style
+        if row_key is not None and column_key is not None:
+            cell = self.cur_sheet.cell(row=row_key, column=column_key)
+            return cell.style
+
+    def get_format(self, row_value: str | int, column_value: str | int):
+        """
+        Gets the cell value based on the `row_value` and `column_value`.
+
+        If the cell is a hyperlink that is currently clickable,
+        the hyperlink target will be returned.
+        """
+        # sets int to str
+        if type(row_value) is int:
+            row_value = str(row_value)
+        if type(column_value) is int:
+            column_value = str(column_value)
+        # get row and column keys
+        row_key, column_key = self.get_row_col_index(row_value, column_value)
+        # returns the cell style
+        if row_key is not None and column_key is not None:
+            cell = self.cur_sheet.cell(row=row_key, column=column_key)
+            return cell.style
+
     def format_picker(self, column: str):
         """
         Determines what formatting to apply to a column.
@@ -459,7 +515,11 @@ class Sheet:
                 actions.append("count_days")
                 return actions
         # dates
-        if "date" in option_keys:
+        if "full_date" in option_keys:
+            if self.list_in_string(self.options["full_date"], column):
+                actions.append("full_date")
+                return actions
+        elif "date" in option_keys:
             if self.list_in_string(self.options["date"], column):
                 actions.append("date")
                 return actions
@@ -523,6 +583,8 @@ class Sheet:
         # integer
         elif "integer" in formatting:
             cell.number_format = "0"
+        elif "comma_format" in formatting:
+            cell.style = "comma_format"
         # decimal
         elif "decimal" in formatting:
             # TODO add decimal increase/decrease
@@ -531,6 +593,9 @@ class Sheet:
         elif "count_days" in formatting:
             cell.number_format = '# "Days"'
         # dates
+        elif "full_date" in formatting:
+            print("setting style")
+            cell.style = "full_date_format"
         elif cell.is_date:
             cell.number_format = "mm-dd-yy"
         # border
@@ -576,3 +641,8 @@ class Sheet:
             col_i = self.col_idx[column]
             for row_i in self.row_idx.values():
                 self.format_cell(column, row_i, col_i)
+
+
+if __name__ == "__main__":
+    excel_obj = Excel(filename="test\excel_test.xlsx")
+    sheet1 = Sheet(excel_obj, "Name")

@@ -367,6 +367,7 @@ class Formatting(unittest.TestCase):
             "currency": ["Price", "MSRP", "Cost"],
             "integer": ["App ID", "Number", "Release Year"],
             "count_days": ["Days Till Release", "Days Since Update"],
+            "full_date": ["Birthday"],
             "date": ["Last Updated", "Date"],
             "decimal": ["Hours Played", "Linux Hours", "Time To Beat in Hours"],
             "left_align": [
@@ -397,7 +398,12 @@ class Formatting(unittest.TestCase):
                 "Date Added",
             ],
         }
-        self.sheet1 = Sheet(self.excel_obj, "Name", options=options)
+        self.sheet1 = Sheet(
+            self.excel_obj, column_name="Name", sheet_name="Sheet 1", options=options
+        )
+        self.sheet3 = Sheet(
+            self.excel_obj, column_name="Name", sheet_name="Sheet 3", options=options
+        )
 
     def test_auto_size_columns(self):
         """
@@ -469,6 +475,14 @@ class Formatting(unittest.TestCase):
             "Name": ["default_border", "center_align"],
         }
         self.assertEqual(formats, answer)
+
+    def test_format_row(self):
+        """
+        ph
+        """
+        self.sheet3.format_row("Test 1")
+        self.excel_obj.save()
+        self.assertFalse(True)
 
     def test_format_row_no_arg(self):
         """

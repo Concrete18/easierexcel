@@ -74,9 +74,9 @@ class Excel:
 
     def save(
         self,
-        use_print: bool = True,
+        use_print: bool = False,
         force_save: bool = False,
-        backup: bool = True,
+        backup: bool = False,
     ):
         """
         Backs up the excel file before saving the changes if `backup` is True.
@@ -111,7 +111,7 @@ class Excel:
                             self.wb.save(self.file_path)
                             self.changes_made = False
                             if use_print:
-                                print(f'Save Complete.{34*" "}')
+                                print(f'Save Complete{35*" "}')
                         # catches error caused by excel worksheet being open
                         except PermissionError:  # pragma: no cover
                             if first_run and use_print:
