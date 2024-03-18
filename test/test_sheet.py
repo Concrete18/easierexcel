@@ -7,7 +7,7 @@ from easierexcel import Excel, Sheet
 
 class Init(unittest.TestCase):
     def setUp(self):
-        self.excel_obj = Excel(filename="test\excel_test.xlsx")
+        self.excel_obj = Excel(filename="test/excel_test.xlsx")
 
     def test_success(self):
         """
@@ -25,7 +25,7 @@ class Init(unittest.TestCase):
 
 class ListInString(unittest.TestCase):
     def setUp(self):
-        self.excel_obj = Excel(filename="test\excel_test.xlsx")
+        self.excel_obj = Excel(filename="test/excel_test.xlsx")
         self.sheet1 = Sheet(self.excel_obj, "Name")
 
     def test_true(self):
@@ -66,7 +66,7 @@ class ListInString(unittest.TestCase):
 
 class GetIndex(unittest.TestCase):
     def setUp(self):
-        self.excel_obj = Excel(filename="test\excel_test.xlsx")
+        self.excel_obj = Excel(filename="test/excel_test.xlsx")
         self.sheet1 = Sheet(self.excel_obj, "Name")
 
     def test_get_column_index(self):
@@ -100,7 +100,7 @@ class GetIndex(unittest.TestCase):
 
 class IndirectCell(unittest.TestCase):
     def setUp(self):
-        self.excel_obj = Excel(filename="test\excel_test.xlsx")
+        self.excel_obj = Excel(filename="test/excel_test.xlsx")
         self.sheet1 = Sheet(self.excel_obj, "Name")
 
     def test_left(self):
@@ -147,7 +147,7 @@ class IndirectCell(unittest.TestCase):
 
 class GetCell(unittest.TestCase):
     def setUp(self):
-        self.excel_obj = Excel(filename="test\excel_test.xlsx")
+        self.excel_obj = Excel(filename="test/excel_test.xlsx")
         self.sheet1 = Sheet(self.excel_obj, "Name")
 
     # TODO test hyperlink
@@ -180,7 +180,7 @@ class GetCell(unittest.TestCase):
 
 class GetRow(unittest.TestCase):
     def setUp(self):
-        self.excel_obj = Excel(filename="test\excel_test.xlsx")
+        self.excel_obj = Excel(filename="test/excel_test.xlsx")
         self.sheet1 = Sheet(self.excel_obj, "Name")
 
     def test_valid(self):
@@ -210,7 +210,7 @@ class GetRow(unittest.TestCase):
 
 class Hyperlink(unittest.TestCase):
     def setUp(self):
-        self.excel_obj = Excel(filename="test\excel_test.xlsx")
+        self.excel_obj = Excel(filename="test/excel_test.xlsx")
         self.sheet2 = Sheet(self.excel_obj, "Name", "Links")
 
     def test_hyperlink_extraction(self):
@@ -244,7 +244,7 @@ class Hyperlink(unittest.TestCase):
 
 class UpdateIndex(unittest.TestCase):
     def setUp(self):
-        self.excel_obj = Excel(filename="test\excel_test.xlsx")
+        self.excel_obj = Excel(filename="test/excel_test.xlsx")
         self.sheet1 = Sheet(self.excel_obj, "Name")
 
     def test_add_new_line(self):
@@ -262,7 +262,7 @@ class UpdateIndex(unittest.TestCase):
 
 class UpdateCell(unittest.TestCase):
     def setUp(self):
-        self.excel_obj = Excel(filename="test\excel_test.xlsx")
+        self.excel_obj = Excel(filename="test/excel_test.xlsx")
         self.sheet1 = Sheet(self.excel_obj, "Name")
 
     def test_update_cell_by_key(self):
@@ -294,7 +294,7 @@ class UpdateCell(unittest.TestCase):
 
 class AddNewLine(unittest.TestCase):
     def setUp(self):
-        self.excel_obj = Excel(filename="test\excel_test.xlsx")
+        self.excel_obj = Excel(filename="test/excel_test.xlsx")
         self.sheet1 = Sheet(self.excel_obj, "Name")
 
     def test_add_new_line(self):
@@ -319,7 +319,7 @@ class AddNewLine(unittest.TestCase):
 
 class Delete(unittest.TestCase):
     def setUp(self):
-        self.excel_obj = Excel(filename="test\excel_test.xlsx")
+        self.excel_obj = Excel(filename="test/excel_test.xlsx")
         self.sheet1 = Sheet(self.excel_obj, "Name")
 
     def test_delete_by_row(self):
@@ -353,7 +353,7 @@ class Delete(unittest.TestCase):
 
 class Formatting(unittest.TestCase):
     def setUp(self):
-        self.excel_obj = Excel(filename="test\excel_test.xlsx")
+        self.excel_obj = Excel(filename="test/excel_test.xlsx")
         options = {
             "shrink_to_fit_cell": True,
             "light_grey_fill": ["Rating Comparison", "Probable Completion"],
@@ -493,7 +493,7 @@ class Formatting(unittest.TestCase):
 
 class DataFrame(unittest.TestCase):
     def setUp(self):
-        self.excel_obj = Excel(filename="test\excel_test.xlsx")
+        self.excel_obj = Excel(filename="test/excel_test.xlsx")
         self.sheet1 = Sheet(self.excel_obj, "Name")
 
     def test_create_dataframe(self):

@@ -11,7 +11,7 @@ class Init(unittest.TestCase):
         """
         ph
         """
-        self.excel_obj = Excel(filename="test\excel_test.xlsx")
+        self.excel_obj = Excel(filename="test/excel_test.xlsx")
         self.assertIsInstance(self.excel_obj, Excel)
 
     @patch("builtins.input", return_value="n")
@@ -24,7 +24,7 @@ class Init(unittest.TestCase):
 
 class Save(unittest.TestCase):
     def setUp(self):
-        self.excel_obj = Excel(filename="test\excel_test.xlsx")
+        self.excel_obj = Excel(filename="test/excel_test.xlsx")
         self.sheet3 = Sheet(self.excel_obj, "Name")
 
     def test_save(self):
@@ -36,7 +36,7 @@ class Save(unittest.TestCase):
         self.assertEqual(self.sheet3.get_cell("Brian", "Birth Month"), "June")
         self.excel_obj.save()
         # reopen to confirm it persists
-        excel_obj = Excel(filename="test\excel_test.xlsx")
+        excel_obj = Excel(filename="test/excel_test.xlsx")
         sheet3 = Sheet(excel_obj, "Name")
         self.assertEqual(sheet3.get_cell("Brian", "Birth Month"), "June")
 

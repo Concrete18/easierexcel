@@ -3,40 +3,44 @@ from openpyxl.styles import NamedStyle
 import pandas as pd
 from easierexcel import Excel
 
+from dataclasses import dataclass, fields
 
+
+@dataclass
 class Sheet:
-    def __init__(
-        self,
-        excel_object: object,
-        column_name: str,
-        sheet_name: str = None,
-        options: dict = None,
-    ) -> None:
-        """
-        Allows interacting with any one sheet within the excel_object given.
+    """
+    Allows interacting with any one sheet within the excel_object given.
 
-        `excel_object` Excel object created using Excel class.
+    `excel_object` Excel object created using Excel class.
 
-        `column_name` Name of the main column you intend to use for
-        identifying rows.
+    `column_name` Name of the main column you intend to use for
+    identifying rows.
 
-        `sheet_name` Name of the sheet to use.
+    `sheet_name` Name of the sheet to use.
 
-        `options` used to determine auto formatting.
-        """
-        self.wb = excel_object.wb
-        self.excel = excel_object
-        self.sheet_name = sheet_name
-        self.column_name = column_name
+    `options` used to determine auto formatting.
+    """
+
+    excel_object: openpyxl.Workbook
+    column_name: str
+    sheet_name: str = None
+    options: dict = None  # TODO Switch to using a new class
+
+    def __post_init__(self):
+        self.wb: openpyxl.Workbook = self.excel_object.wb
+        self.excel: Excel = self.excel_object
+        self.sheet_name = self.sheet_name
+        self.column_name = self.column_name
         # defaults used sheet to first one if none is specified
-        if sheet_name:
-            if sheet_name in self.wb.sheetnames:
-                self.cur_sheet = self.wb[sheet_name]
+        if self.sheet_name:
+            if self.sheet_name in self.wb.sheetnames:
+                self.cur_sheet = self.wb[self.sheet_name]
             else:
-                raise Exception(f"{sheet_name} sheet does not exist.")
+                raise Exception(f"{self.sheet_name} sheet does not exist.")
         else:
+            self.sheet_name = self.wb.sheetnames[0]
             self.cur_sheet = self.wb[self.wb.sheetnames[0]]
-        self.column_name = column_name
+        self.column_name = self.column_name
         # column and row indexes
         self.col_idx = self.get_column_index()
         self.row_idx = self.get_row_index(self.column_name)
@@ -59,10 +63,6 @@ class Sheet:
             comma_format = NamedStyle(name="comma_format", number_format="#,##0")
             self.wb.add_named_style(comma_format)
 
-        print(self.wb.named_styles)
-
-        # options
-        self.options = options
         if not self.options:
             self.options = {
                 "shrink_to_fit_cell": True,
@@ -78,6 +78,13 @@ class Sheet:
                 "decimal": ["Hours"],
                 "not_centered": ["Name"],
             }
+
+    def __repr__(self):
+        string = "Sheet("
+        for field in fields(self):
+            string += f"\n  {field.name}: {getattr(self, field.name)}"
+        string += "\n)"
+        return string
 
     def create_dataframe(self, date_cols: list = None, na_vals: list = None):
         """
@@ -381,7 +388,7 @@ class Sheet:
 
     # formatting
 
-    def set_border(self, cell: object, style: str = "thin"):
+    def set_border(self, cell, style: str = "thin"):
         """
         Sets the given `cell` border to cover all sides with the given `style`.
         """
@@ -644,5 +651,6 @@ class Sheet:
 
 
 if __name__ == "__main__":
-    excel_obj = Excel(filename="test\excel_test.xlsx")
+    excel_obj = Excel(filename="test/excel_test.xlsx")
     sheet1 = Sheet(excel_obj, "Name")
+    print(sheet1)
