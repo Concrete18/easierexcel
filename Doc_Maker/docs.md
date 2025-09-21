@@ -6,13 +6,6 @@ Allows retreiving, adding, updating, deleting and formatting cells within Excel.
 
 `filename` is the path to the excel file.
 
-`use_logging` allows disabling all logs when running.
-
-`log_file` sets the path for logging.
-
-`log_level` Sets the logging level of this logger.
-level must be an int or a str.
-
 #### save Function
 
 Backs up the excel file before saving the changes if `backup` is True.
