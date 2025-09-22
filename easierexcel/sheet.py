@@ -1,6 +1,7 @@
 # third-party imports
-import openpyxl
 import pandas as pd
+from openpyxl.styles import Font, Border, Side, Alignment, PatternFill
+from openpyxl.utils import get_column_letter
 
 # my package imports
 from easierexcel import Excel
@@ -11,8 +12,8 @@ class Sheet:
         self,
         excel_object: Excel,
         column_name: str,
-        sheet_name: str = None,
-        options: dict = None,
+        sheet_name: str = "",
+        options: dict = {},
     ) -> None:
         """
         Allows interacting with any one sheet within the excel_object given.
@@ -37,7 +38,8 @@ class Sheet:
             else:
                 raise Exception(f"{sheet_name} sheet does not exist.")
         else:
-            self.cur_sheet = self.wb[self.wb.sheetnames[0]]
+            self.sheet_name = self.wb.sheetnames[0]
+            self.cur_sheet = self.wb[self.sheet_name]
         self.column_name = column_name
         # column and row indexes
         self.col_idx = self.get_column_index()
@@ -65,7 +67,7 @@ class Sheet:
                 "not_centered": ["Name"],
             }
 
-    def create_dataframe(self, date_cols: list = None, na_vals: list = None):
+    def create_dataframe(self, date_cols: list = [], na_vals: list = []):
         """
         Creates a panda dataframe using the current used sheet.
 
@@ -84,8 +86,8 @@ class Sheet:
 
     def indirect_cell(
         self,
-        cur_col: str = None,
-        ref_col: str = None,
+        cur_col: str = "",
+        ref_col: str = "",
         left: int = 0,
         right: int = 0,
         manual_set: int = 0,
@@ -153,12 +155,13 @@ class Sheet:
         else:
             return any(x in string for x in list)
 
-    def get_row_col_index(self, row_value: str or int, column_value: str or int):
+    def get_row_col_index(
+        self, row_value: str | int, column_value: str | int
+    ) -> tuple[int | None, int | None]:
         """
         Gets the row and column index for the given values if they exist.
 
-        Will return the `row_value` and `column_value` if they are
-        numbers already.
+        Will return the `row_value` and `column_value` if they are numbers already.
         """
         row_key, column_key = None, None
         row_value = str(row_value)
@@ -209,24 +212,50 @@ class Sheet:
         else:
             return None
 
-    def get_cell(self, row_value: str or int, column_value: str or int):
+    def get_cell(
+        self,
+        row_value: str | int,
+        column_value: str | int,
+    ):
         """
         Gets the cell value based on the `row_value` and `column_value`.
 
         If the cell is a hyperlink that is currently clickable,
         the hyperlink target will be returned.
         """
+        if not row_value or not column_value:
+            return None
         # sets int to str
-        if type(row_value) is int:
+        if isinstance(row_value, int):
             row_value = str(row_value)
-        if type(column_value) is int:
+        elif isinstance(column_value, int):
             column_value = str(column_value)
         # get row and column keys
         row_key, column_key = self.get_row_col_index(row_value, column_value)
         # returns the cell value
-        return self.get_cell_by_key(row_key, column_key)
+        if row_key and column_key:
+            return self.get_cell_by_key(row_key, column_key)
+        else:
+            return None
 
-    def get_row(self, row_value: str or int):
+    def get_row(self, row_value: str | int):
+        """
+        Gets the row value based on the `row_value`.
+        """
+        # sets int to str
+        row_value = str(row_value) if isinstance(row_value, int) else row_value
+        # gets row dict
+        row_dict = {}
+        if row_value not in self.row_idx.keys():
+            row_dict = {column: None for column in self.col_idx.keys()}
+        else:
+            row_data = self.cur_sheet[self.row_idx[row_value]]
+            columns = list(self.col_idx.keys())
+            row_dict = {col: entry.value for col, entry in zip(columns, row_data)}
+        return row_dict
+
+    # TODO check if this is better then the old
+    def get_row2(self, row_value: str | int):
         """
         Gets the row value based on the `row_value`.
         """
@@ -238,7 +267,6 @@ class Sheet:
         if row_value not in self.row_idx.keys():
             for column in self.col_idx.keys():
                 row_dict[column] = None
-            row_dict
         else:
             row_data = self.cur_sheet[self.row_idx[row_value]]
             for i, entry in enumerate(row_data):
@@ -251,13 +279,15 @@ class Sheet:
         Updates the current row with the `column_key` in the row_idx variable.
         """
         # TODO add test for this
-        self.row_idx[str(column_key)] = self.cur_sheet._current_row
+        # FIXME fix any lines that require "type: ignore"
+        new_index = self.cur_sheet._current_row  # type: ignore
+        self.row_idx[str(column_key)] = new_index
 
     def update_cell_by_key(
         self,
         row_key: int,
         col_key: int,
-        new_val: str or int,
+        new_val: str | int | None,
         replace: bool = True,
     ):
         """
@@ -275,14 +305,14 @@ class Sheet:
             # returns False if replace is False and the current value is not none
             if not replace and cur_val:
                 return False
-            # updates only if cell will actually be changed
             if new_val == "":
                 new_val = None
+            # updates only if cell will actually be changed
             if cur_val != new_val:
                 # FIXME datetime objects cause issues with this
-                if cell.is_date:
+                if cell.is_date:  # type: ignore
                     pass
-                self.cur_sheet.cell(row=row_key, column=col_key).value = new_val
+                self.cur_sheet.cell(row=row_key, column=col_key).value = new_val  # type: ignore
                 self.excel.changes_made = True
                 return True
         else:
@@ -292,7 +322,7 @@ class Sheet:
         self,
         row_val: str,
         col_val: str,
-        new_val: str or int,
+        new_val: str | int,
         replace: bool = True,
     ):
         """
@@ -304,7 +334,7 @@ class Sheet:
         existing value changed if it is not None.
         """
         row_key, col_key = self.get_row_col_index(row_val, col_val)
-        return self.update_cell_by_key(row_key, col_key, new_val, replace)
+        return self.update_cell_by_key(row_key, col_key, new_val, replace)  # type: ignore
 
     def clear_cell(
         self,
@@ -315,7 +345,7 @@ class Sheet:
         Clears the value of the cell based on `row_val` and `col_val`.
         """
         row_key, col_key = self.get_row_col_index(row_val, col_val)
-        return self.update_cell_by_key(row_key, col_key, "", True)
+        return self.update_cell_by_key(row_key, col_key, "", True)  # type: ignore
 
     def add_new_line(self, cell_dict: dict):
         """
@@ -376,11 +406,11 @@ class Sheet:
         """
         Sets the given `cell` border to cover all sides with the given `style`.
         """
-        cell.border = openpyxl.styles.Border(
-            left=openpyxl.styles.Side(style=style),
-            right=openpyxl.styles.Side(style=style),
-            top=openpyxl.styles.Side(style=style),
-            bottom=openpyxl.styles.Side(style=style),
+        cell.border = Border(  # type: ignore
+            left=Side(style=style),  # type: ignore
+            right=Side(style=style),  # type: ignore
+            top=Side(style=style),  # type: ignore
+            bottom=Side(style=style),  # type: ignore
             outline=True,
         )
 
@@ -393,10 +423,10 @@ class Sheet:
         """
         Sets the given `cell` to have fill with `color` and `fill_type`
         """
-        cell.fill = openpyxl.styles.PatternFill(
+        cell.fill = PatternFill(  # type: ignore
             start_color=color,
             end_color=color,
-            fill_type=fill_type,
+            fill_type=fill_type,  # type: ignore
         )
 
     def set_style(self, cell: object, format: str = "general"):
@@ -405,20 +435,18 @@ class Sheet:
         """
         match format:
             case "percent":
-                cell.style = "Percent"
+                cell.style = "Percent"  # type: ignore
             case "currency":
-                cell.style = "Currency"
+                cell.style = "Currency"  # type: ignore
             case _:
-                cell.style = "General"
+                cell.style = "General"  # type: ignore
 
-    def format_picker(self, column: str):
+    def format_picker(self, column: str) -> list[str]:
         """
         Determines what formatting to apply to a column.
         """
         option_keys = self.options.keys()
-        actions = []
-        # border
-        actions.append("default_border")
+        actions = ["default_border"]
         # alignment
         alignment = None
         if "default_align" in option_keys:
@@ -495,23 +523,25 @@ class Sheet:
         for column in self.col_idx.keys():
             col_i = self.col_idx[column]
             cell = self.cur_sheet.cell(row=1, column=col_i)
-            cell.font = openpyxl.styles.Font(
+            cell.font = Font(
                 name="Calibri",
                 size=font_size,
                 bold=bold_font,
                 # color="FF000000",
             )
 
-    def auto_size_columns(self, width_multiplier=1.23, set_height=None):
+    def auto_size_columns(self, width_multiplier=1.23):
         """
         ph
         """
         for col_cells in self.cur_sheet.columns:
             max_col_len = max(len(str(cell.value)) for cell in col_cells)
-            new_col_lett = openpyxl.utils.get_column_letter(col_cells[0].column)
-            if max_col_len > 0:
-                col_width = max_col_len * width_multiplier
-                self.cur_sheet.column_dimensions[new_col_lett].width = col_width
+            column_index = col_cells[0].column
+            if isinstance(column_index, int):
+                new_col_lett = get_column_letter(column_index)
+                if max_col_len > 0:
+                    col_width = max_col_len * width_multiplier
+                    self.cur_sheet.column_dimensions[new_col_lett].width = col_width
 
     def format_cell(self, column: str, row_i: int, col_i: int):
         """
@@ -540,18 +570,18 @@ class Sheet:
         elif "count_days" in formatting:
             cell.number_format = '# "Days"'
         # dates
-        elif cell.is_date:
+        elif cell.is_date:  # type: ignore
             cell.number_format = "mm-dd-yy"
         # border
         if "default_border" in formatting:
             self.set_border(cell)
         # alignment
         if "left_align" in formatting:
-            cell.alignment = openpyxl.styles.Alignment(horizontal="left")
+            cell.alignment = Alignment(horizontal="left")
         elif "center_align" in formatting:
-            cell.alignment = openpyxl.styles.Alignment(horizontal="center")
+            cell.alignment = Alignment(horizontal="center")
         elif "right_align" in formatting:
-            cell.alignment = openpyxl.styles.Alignment(horizontal="right")
+            cell.alignment = Alignment(horizontal="right")
         # fill
         if "black_fill" in formatting:
             self.set_fill(cell, color="fffff")
@@ -585,3 +615,9 @@ class Sheet:
             col_i = self.col_idx[column]
             for row_i in self.row_idx.values():
                 self.format_cell(column, row_i, col_i)
+
+
+if __name__ == "__main__":
+    excel_wb = Excel(filename="tests/excel_test.xlsx")
+    sheet1 = Sheet(excel_wb, "Name")
+    print(sheet1)

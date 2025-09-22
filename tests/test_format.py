@@ -94,6 +94,5 @@ class TestFormatRow:
         """
         ph
         """
-
         with pytest.raises(TypeError):
-            self.sheet1.format_row()
+            self.sheet1.format_row()  # type: ignore

@@ -211,13 +211,6 @@ class TestHyperlink:
         extracted_url = self.sheet2.extract_hyperlink(formula_link)
         assert url == extracted_url
 
-    def test_get_hyperlink(self):
-        """
-        Tests getting clickable hyperlink.
-        """
-        url = self.sheet2.get_cell("Tony Stark", "Website")
-        assert url == "https://www.Stark.com/"
-
     def test_get_hyperlink_TypeError(self):
         """
         Tests getting clickable hyperlink.

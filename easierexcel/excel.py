@@ -1,7 +1,9 @@
-from logging.handlers import RotatingFileHandler
-import logging as lg
-import shutil, os, sys, time, openpyxl, zipfile
+# standard library
+import shutil, os, time, zipfile
 from pathlib import Path
+
+# third-party imports
+from openpyxl import load_workbook
 
 
 class Excel:
@@ -9,74 +11,38 @@ class Excel:
     Allows retreiving, adding, updating, deleting and formatting cells within Excel.
     """
 
-    changes_made = False
-    backed_up = False
-    ext_terminal = sys.stdout.isatty()
-
-    def __init__(
-        self,
-        filename: str,
-        use_logging: bool = True,
-        log_file: str = "logs/excel.log",
-        log_level=lg.DEBUG,
-    ):
+    def __init__(self, filename: str) -> None:
         """
         `filename` is the path to the excel file.
-
-        `use_logging` allows disabling all logs when running.
-
-        `log_file` sets the path for logging.
-
-        `log_level` Sets the logging level of this logger.
-        level must be an int or a str.
         """
-        self.workbook_setup(filename)
-        # logger setup
-        self.use_logging = use_logging
-        datefmt = "%m-%d-%Y %I:%M:%S %p"
-        log_formatter = lg.Formatter(
-            "%(asctime)s %(levelname)s %(message)s", datefmt=datefmt
-        )
-        self.logger = lg.getLogger(__name__)
-        self.logger.setLevel(log_level)  # Log Level
-        max_gigs = 2
-        # TODO test this
-        if self.use_logging:
-            if not os.path.exists(log_file):
-                os.makedirs(os.path.dirname(log_file), exist_ok=True)
-                with open(log_file, "w") as f:
-                    pass
-        my_handler = RotatingFileHandler(
-            log_file,
-            maxBytes=max_gigs * 1024 * 1024,
-            backupCount=2,
-        )
-        my_handler.setFormatter(log_formatter)
-        self.logger.addHandler(my_handler)
-
-    def workbook_setup(self, filename):
+        self.changes_made = False
+        self.backed_up = False
         # workbook setup
         self.file_path = Path(filename)
         try:
-            self.wb = openpyxl.load_workbook(self.file_path, data_only=True)
+            # TODO test using blank filter and see if data_only fixes it
+            self.wb = load_workbook(self.file_path, data_only=True)
         except zipfile.BadZipFile:
-            print(f"Error with {self.file_path}.")
+            print(f"Error with {self.file_path}")
             response = input("Do you want to restore backup?\n")
             if response in ["yes", "yeah", "y"]:
                 # renames current to .old
                 os.rename(self.file_path, f"{self.file_path}.old")
                 # copies backup and renames to non backup filename
                 shutil.copy(f"{self.file_path}.bak", self.file_path)
-                # resetup workbook
-                self.wb = openpyxl.load_workbook(self.file_path)
+                # sets up workbook with restored backup
+                self.wb = load_workbook(self.file_path, data_only=True)
             else:  # pragma: no cover
                 raise Exception("Excel file is corrupted.")
 
+    def __repr__(self) -> str:
+        return f'Excel(filename="{self.file_path}", Sheets="{self.wb.sheetnames}")'
+
     def save(
         self,
-        use_print: bool = True,
+        use_print: bool = False,
         force_save: bool = False,
-        backup: bool = True,
+        backup: bool = False,
     ):
         """
         Backs up the excel file before saving the changes if `backup` is True.
@@ -98,7 +64,6 @@ class Excel:
                     backup_path = f"{self.file_path}.bak"
                     shutil.copy(self.file_path, backup_path)
                     self.backed_up = True
-                    self.logger.info(f"Excel file backed up")
             # saves the file once it is closed
             if use_print:
                 print("\nSaving...")
@@ -108,10 +73,11 @@ class Excel:
                     if self.file_path.exists():
                         # tries to save the file
                         try:
-                            self.wb.save(self.file_path)
-                            self.changes_made = False
+                            if self.wb:
+                                self.wb.save(self.file_path)
+                                self.changes_made = False
                             if use_print:
-                                print(f'Save Complete.{34*" "}')
+                                print(f'Save Complete{35*" "}')
                         # catches error caused by excel worksheet being open
                         except PermissionError:  # pragma: no cover
                             if first_run and use_print:
@@ -127,14 +93,13 @@ class Excel:
                 exit()
         else:
             msg = "Save Skipped due to no changes being made."
-            self.logger.info(msg)
             return False
 
     def open_excel(
         self,
         save: bool = True,
         test: bool = False,
-    ):  # pragma: no cover
+    ) -> None:  # pragma: no cover
         """
         Opens the current excel file if it still exists and then exits.
 
@@ -149,3 +114,8 @@ class Excel:
                 os.startfile(self.file_path)
         else:
             raise Exception(f"{self.file_path} no longer exists.")
+
+
+if __name__ == "__main__":
+    excel_file = Excel(filename="tests/excel_test.xlsx")
+    print(excel_file)
