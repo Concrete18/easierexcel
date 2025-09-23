@@ -1,3 +1,6 @@
+# standard library
+import datetime as dt
+
 # third-party imports
 import pandas as pd
 from openpyxl.styles import Font, Border, Side, Alignment, PatternFill
@@ -304,7 +307,7 @@ class Sheet:
         self,
         row_val: str,
         col_val: str,
-        new_val: str | int,
+        new_val: str | int | float | dt.datetime | None,
         replace: bool = True,
     ):
         """
