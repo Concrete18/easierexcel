@@ -243,23 +243,6 @@ class Sheet:
         Gets the row value based on the `row_value`.
         """
         # sets int to str
-        row_value = str(row_value) if isinstance(row_value, int) else row_value
-        # gets row dict
-        row_dict = {}
-        if row_value not in self.row_idx.keys():
-            row_dict = {column: None for column in self.col_idx.keys()}
-        else:
-            row_data = self.cur_sheet[self.row_idx[row_value]]
-            columns = list(self.col_idx.keys())
-            row_dict = {col: entry.value for col, entry in zip(columns, row_data)}
-        return row_dict
-
-    # TODO check if this is better then the old
-    def get_row2(self, row_value: str | int):
-        """
-        Gets the row value based on the `row_value`.
-        """
-        # sets int to str
         if type(row_value) is int:
             row_value = str(row_value)
         # gets row dict
@@ -274,7 +257,7 @@ class Sheet:
                 row_dict[columns[i]] = entry.value
         return row_dict
 
-    def update_index(self, column_key: str):
+    def update_index(self, column_key: str) -> None:
         """
         Updates the current row with the `column_key` in the row_idx variable.
         """
@@ -289,7 +272,7 @@ class Sheet:
         col_key: int,
         new_val: str | int | None,
         replace: bool = True,
-    ):
+    ) -> bool:
         """
         Updates the cell based on `row_key` and `col_key` to `new_val`.
         This is basically the index in excel for columns and rows.
@@ -315,8 +298,7 @@ class Sheet:
                 self.cur_sheet.cell(row=row_key, column=col_key).value = new_val  # type: ignore
                 self.excel.changes_made = True
                 return True
-        else:
-            return False
+        return False
 
     def update_cell(
         self,
